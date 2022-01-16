@@ -1,15 +1,15 @@
 package mysql
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"os"
 )
 
 type MySQL struct {
-	*gorm.DB
+	*sql.DB
 }
 
 // Dial connect to DB and return connection
@@ -22,10 +22,16 @@ func Dial() (*MySQL, error) {
 	mysqlPassword := os.Getenv("pwd")
 	mysqlDBName := os.Getenv("dbName")
 
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysqlUser, mysqlPassword, mysqlDBName)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := sql.Open(
+		"mysql",
+		fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", mysqlUser, mysqlPassword, mysqlDBName),
+	)
 	if err != nil {
 		return nil, err
 	}
-	return &MySQL{db}, err
+	return &MySQL{db}, nil
+}
+
+func (mysqlConn *MySQL) GetDB() *sql.DB {
+	return mysqlConn.DB
 }
