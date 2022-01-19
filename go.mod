@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt v3.0.0+incompatible // indirect
 	github.com/google/uuid v1.3.0
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 )
