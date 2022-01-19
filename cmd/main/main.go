@@ -42,7 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = ur.CreateUser(user)
+	_, err = ur.CreateUser(user)
 	if err != nil {
 		log.Fatal(err)
 	}

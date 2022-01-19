@@ -59,34 +59,34 @@ func (r *UsersRepo) GetUserByID(id uuid.UUID) (*models.User, error) {
 	return &user, nil
 }
 
-func (r *UsersRepo) CreateUser(user *models.User) (err error) {
+func (r *UsersRepo) CreateUser(user *models.User) (id uuid.UUID, err error) {
 	if user == nil {
-		return errors.New("no user provided")
+		return id, errors.New("no user provided")
 	}
 	uid, err := user.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return id, err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("INSERT INTO users(id, name, email, password_hash) VALUES(?, ?, ?, ?)")
+		stmt, err := r.TX.Prepare("INSERT INTO users(id, name, email, password_hash) VALUES(?, ?, ?, ?)  RETURNING id")
 		if err != nil {
-			return err
+			return id, err
 		}
-		_, err = stmt.Exec(uid, user.Name, user.Email, user.PasswordHash)
+		err = stmt.QueryRow(uid, user.Name, user.Email, user.PasswordHash).Scan(&id)
 		if err != nil {
-			return err
+			return id, err
 		}
-		return nil
+		return id, nil
 	}
 	stmt, err := r.DB.Prepare("INSERT INTO users(id, name, email, password_hash) VALUES(?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return id, err
 	}
 	_, err = stmt.Exec(uid, user.Name, user.Email, user.PasswordHash)
 	if err != nil {
-		return err
+		return id, err
 	}
-	return nil
+	return id, nil
 }
 
 func (r *UsersRepo) UpdateUser(user *models.User) (err error) {

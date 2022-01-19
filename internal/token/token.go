@@ -3,16 +3,17 @@ package token
 import (
 	"errors"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"strings"
 	"time"
 )
 
 type JWTCustomClaims struct {
-	ID int `json:"id"`
+	ID uuid.UUID `json:"id"`
 	jwt.StandardClaims
 }
 
-func GenerateToken(userID, lifetimeMinutes int, secret string) (string, error) {
+func GenerateToken(userID uuid.UUID, lifetimeMinutes int, secret string) (string, error) {
 	claims := &JWTCustomClaims{
 		userID,
 		jwt.StandardClaims{
