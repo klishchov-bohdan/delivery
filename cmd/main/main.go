@@ -1,26 +1,59 @@
 package main
 
 import (
-	store "github.com/klishchov-bohdan/delivery/pkg/store"
-	"github.com/klishchov-bohdan/delivery/pkg/store/database/mysql"
-	"github.com/klishchov-bohdan/delivery/pkg/store/database/transaction"
+	"fmt"
+	"github.com/google/uuid"
+	"github.com/klishchov-bohdan/delivery/internal/models"
+	"github.com/klishchov-bohdan/delivery/internal/store/db"
+	"github.com/klishchov-bohdan/delivery/internal/store/db/repo"
 	"log"
 )
 
 func main() {
-	db, err := mysql.Dial()
+	db, err := db.Dial()
 	if err != nil {
 		log.Fatal(err)
 	}
-	storage := store.NewStore(mysql.NewUserMySQL(db))
+	ur := repo.NewUsersRepo(db)
+	sr := repo.NewSuppliersRepo(db)
+	pr := repo.NewProductMySQL(db)
+
+	users, err := ur.GetAllUsers()
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = storage.ExecuteTransaction(db.GetDB(),
-		transaction.NewPipelineStmt("insert into suppliers(id, name, description) values(?, ?, ?)", 1, "Supplier1", "desc1"),
-		transaction.NewPipelineStmt("insert into suppliers(id, name, description) values(?, ?, ?)", 6, "Supplier6", "desc6"),
-		transaction.NewPipelineStmt("INSERT INTO users(id, name, email, password_hash) VALUES(?, ?, ?, ?)", []byte("dscjhbkecn"), "Alex", "alex@gmail.com", "some hash"))
+	suppliers, err := sr.GetAllSuppliers()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	products, err := pr.GetAllProducts()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(users)
+	fmt.Println(suppliers)
+	fmt.Println(products)
+	if err = ur.BeginTx(); err != nil {
+		log.Fatal(err)
+	}
+	sr.SetTx(ur.GetTx())
+	user, err := models.CreateUser("Luc", "luc@gmail.com", "password")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = ur.CreateUser(user)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = sr.CreateSupplier(&models.Supplier{ID: uuid.New(), Name: "Name", Description: "Desc"})
+	if err != nil {
+		_ = ur.RollbackTx()
+		log.Fatal(err)
+	}
+	err = ur.CommitTx()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sr.SetTx(nil)
 }

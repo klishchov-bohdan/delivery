@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID           []byte
+	ID           uuid.UUID
 	Name         string
 	Email        string
 	PasswordHash string
@@ -20,7 +20,7 @@ func CreateUser(name, email, password string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	id, err := uuid.New().MarshalBinary()
+	id, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err
 	}

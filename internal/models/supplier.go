@@ -1,9 +1,12 @@
 package models
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Supplier struct {
-	ID          []byte
+	ID          uuid.UUID
 	Name        string
 	Description string
 	CreatedAt   *time.Time
