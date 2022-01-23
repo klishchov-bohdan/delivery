@@ -59,43 +59,39 @@ func (r *UsersRepo) GetUserByID(id uuid.UUID) (*models.User, error) {
 	return &user, nil
 }
 
-func (r *UsersRepo) CreateUser(user *models.User) (id uuid.UUID, err error) {
+func (r *UsersRepo) CreateUser(user *models.User) (uuid.UUID, error) {
 	if user == nil {
-		return id, errors.New("no user provided")
+		return uuid.Nil, errors.New("no user provided")
 	}
 	uid, err := user.ID.MarshalBinary()
 	if err != nil {
-		return id, err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("INSERT INTO users(id, name, email, password_hash) VALUES(?, ?, ?, ?)  RETURNING id")
+		stmt, err := r.TX.Prepare("INSERT INTO users(id, name, email, password_hash) VALUES(?, ?, ?, ?)")
 		if err != nil {
-			return id, err
+			return uuid.Nil, err
 		}
-		err = stmt.QueryRow(uid, user.Name, user.Email, user.PasswordHash).Scan(&id)
+		_, err = stmt.Exec(uid, user.Name, user.Email, user.PasswordHash)
 		if err != nil {
-			return id, err
+			return uuid.Nil, err
 		}
-		return id, nil
+		return user.ID, nil
 	}
 	stmt, err := r.DB.Prepare("INSERT INTO users(id, name, email, password_hash) VALUES(?, ?, ?, ?)")
 	if err != nil {
-		return id, err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(uid, user.Name, user.Email, user.PasswordHash)
 	if err != nil {
-		return id, err
+		return uuid.Nil, err
 	}
-	return id, nil
+	return user.ID, nil
 }
 
 func (r *UsersRepo) UpdateUser(user *models.User) (err error) {
 	if user == nil {
 		return errors.New("no user provided")
-	}
-	err = r.DB.QueryRow("SELECT * FROM users WHERE id = ?", user.ID).Scan()
-	if err != nil {
-		return errors.New("user not found")
 	}
 	uid, err := user.ID.MarshalBinary()
 	if err != nil {
@@ -124,10 +120,6 @@ func (r *UsersRepo) UpdateUser(user *models.User) (err error) {
 }
 
 func (r *UsersRepo) DeleteUser(id uuid.UUID) (err error) {
-	err = r.DB.QueryRow("SELECT * FROM users WHERE id = ?", id).Scan()
-	if err != nil {
-		return errors.New("user not found")
-	}
 	uid, err := id.MarshalBinary()
 	if err != nil {
 		return err

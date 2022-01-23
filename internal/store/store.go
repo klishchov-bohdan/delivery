@@ -9,16 +9,22 @@ type Store struct {
 	Users     *repo.UsersRepo
 	Suppliers *repo.SuppliersRepo
 	Products  *repo.ProductRepo
+	Addresses *repo.ShippingAddressesRepo
+	Tokens    *repo.TokensRepo
 }
 
 func NewStore(db *sql.DB) *Store {
 	ur := repo.NewUsersRepo(db)
 	sr := repo.NewSuppliersRepo(db)
 	pr := repo.NewProductMySQL(db)
+	ar := repo.NewShippingAddressesRepo(db)
+	tr := repo.NewTokensRepo(db)
 
 	return &Store{
 		Users:     ur,
 		Suppliers: sr,
 		Products:  pr,
+		Addresses: ar,
+		Tokens:    tr,
 	}
 }

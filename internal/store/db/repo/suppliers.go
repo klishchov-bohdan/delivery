@@ -82,10 +82,6 @@ func (r *SuppliersRepo) UpdateSupplier(supplier *models.Supplier) (err error) {
 	if supplier == nil {
 		return errors.New("no supplier provided")
 	}
-	err = r.DB.QueryRow("SELECT * FROM suppliers WHERE id = ?", supplier.ID).Scan()
-	if err != nil {
-		return errors.New("supplier not found")
-	}
 	uid, err := supplier.ID.MarshalBinary()
 	if err != nil {
 		return err
@@ -113,10 +109,6 @@ func (r *SuppliersRepo) UpdateSupplier(supplier *models.Supplier) (err error) {
 }
 
 func (r *SuppliersRepo) DeleteSupplier(id uuid.UUID) (err error) {
-	err = r.DB.QueryRow("SELECT * FROM suppliers WHERE id = ?", id).Scan()
-	if err != nil {
-		return errors.New("supplier not found")
-	}
 	uid, err := id.MarshalBinary()
 	if err != nil {
 		return err

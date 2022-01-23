@@ -18,13 +18,13 @@ func NewProductMySQL(db *sql.DB) *ProductRepo {
 
 func (r *ProductRepo) GetAllProducts() (*[]models.Product, error) {
 	var products []models.Product
-	rows, err := r.DB.Query("SELECT id, name, description, price, weight, created_at, updated_at FROM products")
+	rows, err := r.DB.Query("SELECT id, supplier_id, name, description, price, weight, created_at, updated_at FROM products")
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var product models.Product
-		err = rows.Scan(&product.ID, &product.Name, &product.Description, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
+		err = rows.Scan(&product.ID, &product.SupplierID, &product.Name, &product.Description, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -40,8 +40,8 @@ func (r *ProductRepo) GetProductByID(id uuid.UUID) (*models.Product, error) {
 		return nil, err
 	}
 	err = r.DB.QueryRow(
-		"SELECT id, name, description, price, weight, created_at, updated_at FROM products WHERE id = ?", uid).
-		Scan(&product.ID, &product.Name, &product.Description, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
+		"SELECT id, supplier_id, name, description, price, weight, created_at, updated_at FROM products WHERE id = ?", uid).
+		Scan(&product.ID, &product.SupplierID, &product.Name, &product.Description, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -57,21 +57,21 @@ func (r *ProductRepo) CreateProduct(product *models.Product) (err error) {
 		return err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("INSERT INTO products(id, name, description, price, weight) VALUES(?, ?, ?, ?, ?)")
+		stmt, err := r.TX.Prepare("INSERT INTO products(id, supplier_id, name, description, price, weight) VALUES(?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			return err
 		}
-		_, err = stmt.Exec(uid, product.Name, product.Description, product.Price, product.Weight)
+		_, err = stmt.Exec(uid, product.SupplierID, product.Name, product.Description, product.Price, product.Weight)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-	stmt, err := r.DB.Prepare("INSERT INTO products(id, name, description, price, weight) VALUES(?, ?, ?, ?, ?)")
+	stmt, err := r.DB.Prepare("INSERT INTO products(id, supplier_id, name, description, price, weight) VALUES(?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(uid, product.Name, product.Description, product.Price, product.Weight)
+	_, err = stmt.Exec(uid, product.SupplierID, product.Name, product.Description, product.Price, product.Weight)
 	if err != nil {
 		return err
 	}
@@ -82,30 +82,26 @@ func (r *ProductRepo) UpdateProduct(product *models.Product) (err error) {
 	if product == nil {
 		return errors.New("no product provided")
 	}
-	err = r.DB.QueryRow("SELECT * FROM products WHERE id = ?", product.ID).Scan()
-	if err != nil {
-		return errors.New("product not found")
-	}
 	uid, err := product.ID.MarshalBinary()
 	if err != nil {
 		return err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("UPDATE products SET name = ?, description = ?, price = ?, weight = ? WHERE id = ?")
+		stmt, err := r.TX.Prepare("UPDATE products SET supplier_id = ?, name = ?, description = ?, price = ?, weight = ? WHERE id = ?")
 		if err != nil {
 			return err
 		}
-		_, err = stmt.Exec(product.Name, product.Description, product.Price, product.Weight, uid)
+		_, err = stmt.Exec(product.SupplierID, product.Name, product.Description, product.Price, product.Weight, uid)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-	stmt, err := r.DB.Prepare("UPDATE products SET name = ?, description = ?, price = ?, weight = ? WHERE id = ?")
+	stmt, err := r.DB.Prepare("UPDATE products SET supplier_id = ?, name = ?, description = ?, price = ?, weight = ? WHERE id = ?")
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(product.Name, product.Description, product.Price, product.Weight, uid)
+	_, err = stmt.Exec(product.SupplierID, product.Name, product.Description, product.Price, product.Weight, uid)
 	if err != nil {
 		return err
 	}
@@ -113,10 +109,6 @@ func (r *ProductRepo) UpdateProduct(product *models.Product) (err error) {
 }
 
 func (r *ProductRepo) DeleteProduct(id uuid.UUID) (err error) {
-	err = r.DB.QueryRow("SELECT * FROM products WHERE id = ?", id).Scan()
-	if err != nil {
-		return errors.New("product not found")
-	}
 	uid, err := id.MarshalBinary()
 	if err != nil {
 		return err

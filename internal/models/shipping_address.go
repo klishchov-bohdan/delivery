@@ -5,9 +5,8 @@ import (
 	"time"
 )
 
-type UserAddress struct {
+type ShippingAddress struct {
 	ID        uuid.UUID
-	UserID    uuid.UUID
 	ZIPCode   string
 	Country   string
 	Region    string
