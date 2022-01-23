@@ -89,53 +89,53 @@ func (r *UsersRepo) CreateUser(user *models.User) (uuid.UUID, error) {
 	return user.ID, nil
 }
 
-func (r *UsersRepo) UpdateUser(user *models.User) (err error) {
+func (r *UsersRepo) UpdateUser(user *models.User) (uuid.UUID, error) {
 	if user == nil {
-		return errors.New("no user provided")
+		return uuid.Nil, errors.New("no user provided")
 	}
 	uid, err := user.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("UPDATE users SET name = ?, email = ?, password_hash = ? WHERE id = ?")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
 		_, err = stmt.Exec(user.Name, user.Email, user.PasswordHash, uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return user.ID, nil
 	}
 	stmt, err := r.DB.Prepare("UPDATE users SET name = ?, email = ?, password_hash = ? WHERE id = ?")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(user.Name, user.Email, user.PasswordHash, uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return user.ID, nil
 }
 
-func (r *UsersRepo) DeleteUser(id uuid.UUID) (err error) {
+func (r *UsersRepo) DeleteUser(id uuid.UUID) (uuid.UUID, error) {
 	uid, err := id.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM users WHERE id = ?", uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM users WHERE id = ?", uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return id, nil
 }
 
 func (r *UsersRepo) BeginTx() error {

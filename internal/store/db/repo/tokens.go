@@ -93,72 +93,77 @@ func (r *TokensRepo) CreateToken(token *models.Token) (uuid.UUID, error) {
 	return token.ID, nil
 }
 
-func (r *TokensRepo) UpdateToken(token *models.Token) (err error) {
+func (r *TokensRepo) UpdateToken(token *models.Token) (uuid.UUID, error) {
 	if token == nil {
-		return errors.New("no token provided")
+		return uuid.Nil, errors.New("no token provided")
 	}
 	uid, err := token.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("UPDATE tokens SET user_id = ?, access_hash = ?, refresh_hash = ? WHERE id = ?")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
 		_, err = stmt.Exec(token.UserID, token.AccessHash, token.RefreshHash, uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return token.ID, nil
 	}
 	stmt, err := r.DB.Prepare("UPDATE tokens SET user_id = ?, access_hash = ?, refresh_hash = ? WHERE id = ?")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(token.UserID, token.AccessHash, token.RefreshHash, uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return token.ID, nil
 }
 
-func (r *TokensRepo) DeleteTokenByID(id uuid.UUID) (err error) {
+func (r *TokensRepo) DeleteTokenByID(id uuid.UUID) (uuid.UUID, error) {
 	uid, err := id.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM tokens WHERE id = ?", uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM tokens WHERE id = ?", uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return id, nil
 }
 
-func (r *TokensRepo) DeleteTokenByUserID(id uuid.UUID) (err error) {
+func (r *TokensRepo) DeleteTokenByUserID(id uuid.UUID) (uuid.UUID, error) {
 	uid, err := id.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
+	}
+	var tokenID uuid.UUID
+	err = r.DB.QueryRow("SELECT id FROM tokens WHERE user_id = ?", uid).Scan(&tokenID)
+	if err != nil {
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM tokens WHERE user_id = ?", uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return tokenID, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM tokens WHERE user_id = ?", uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return tokenID, nil
 }
 
 func (r *TokensRepo) BeginTx() error {
