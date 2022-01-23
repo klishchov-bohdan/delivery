@@ -71,12 +71,16 @@ func (r *TokensRepo) CreateToken(token *models.Token) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
+	userID, err := token.UserID.MarshalBinary()
+	if err != nil {
+		return uuid.Nil, err
+	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("INSERT INTO tokens(id, user_id, access_hash, refresh_hash) VALUES(?, ?, ?, ?)")
 		if err != nil {
 			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(uid, token.UserID, token.AccessHash, token.RefreshHash)
+		_, err = stmt.Exec(uid, userID, token.AccessHash, token.RefreshHash)
 		if err != nil {
 			return uuid.Nil, err
 		}
@@ -86,7 +90,7 @@ func (r *TokensRepo) CreateToken(token *models.Token) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(uid, token.UserID, token.AccessHash, token.RefreshHash)
+	_, err = stmt.Exec(uid, userID, token.AccessHash, token.RefreshHash)
 	if err != nil {
 		return uuid.Nil, err
 	}
