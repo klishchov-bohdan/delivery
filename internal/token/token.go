@@ -39,7 +39,7 @@ func GetTokenFromBearerString(bearer string) string {
 	return token
 }
 
-func ValidateToken(tokenStr string, secret string) (*JWTCustomClaims, error) {
+func GetClaims(tokenStr string, secret string) (*JWTCustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &JWTCustomClaims{}, func(token *jwt.Token) (
 		interface{}, error,
 	) {
@@ -49,8 +49,23 @@ func ValidateToken(tokenStr string, secret string) (*JWTCustomClaims, error) {
 		return nil, err
 	}
 	claims, ok := token.Claims.(*JWTCustomClaims)
-	if !ok || !token.Valid {
+	if !ok {
 		return nil, errors.New("failed to parse token claims")
 	}
 	return claims, nil
+}
+
+func ValidateToken(tokenStr string, secret string) (bool, error) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (
+		interface{}, error,
+	) {
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return false, err
+	}
+	if !token.Valid {
+		return false, errors.New("invalid token")
+	}
+	return true, nil
 }

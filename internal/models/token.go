@@ -13,3 +13,8 @@ type Token struct {
 	CreatedAt   *time.Time
 	UpdatedAt   *time.Time
 }
+
+type ResponseToken struct {
+	Access  string `json:"access_token"`
+	Refresh string `json:"refresh_token"`
+}

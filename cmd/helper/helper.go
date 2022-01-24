@@ -68,10 +68,12 @@ func (w ParserJSON) Stop() {
 
 }
 
+////////////////////////////////////////
 type WriterDB struct {
 }
 
 func (w WriterDB) Do(data interface{}, i int) {
+	fmt.Printf("Routine %d: Writing supplier %d to db\n", i, data)
 	supplier := &models.Supplier{}
 	supplierRepo, err := ioutil.ReadDir("./cmd/helper/suppliers")
 	if err != nil {
@@ -134,6 +136,7 @@ func (w WriterDB) Do(data interface{}, i int) {
 					log.Fatal(err)
 				}
 			}
+			fmt.Printf("Routine %d: Done\n", i)
 			break
 		}
 	}
