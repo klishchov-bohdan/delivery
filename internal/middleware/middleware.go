@@ -24,48 +24,35 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
 		err := godotenv.Load("config/token.env")
 		if err != nil {
-			println("here 1")
 			http.Error(w, "Cant load token.env file", http.StatusInternalServerError)
 			return
 		}
 		accessSecret := os.Getenv("AccessSecret")
-		claims, err := token.GetClaims(accessString, accessSecret)
-		if err != nil {
-			println("here 2")
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
 		isValid, err := token.ValidateToken(accessString, accessSecret)
 		if err != nil {
-			println("here 3")
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		if !isValid {
-			println("here 4")
-			_, err := m.service.Token.DeleteTokenByUserID(claims.ID)
-			if err != nil {
-				println("here 5")
-				http.Error(w, err.Error(), http.StatusUnauthorized)
-				return
-			}
 			http.Error(w, "middleware: invalid token", http.StatusUnauthorized)
+			return
+		}
+		claims, err := token.GetClaims(accessString, accessSecret)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		received, err := m.service.Token.GetTokenByUserID(claims.ID)
 		if err != nil {
-			println("here 6")
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		if received == nil {
-			println("here 7")
-			http.Error(w, "token does not exists", http.StatusUnauthorized)
+			http.Error(w, "user has not authorized", http.StatusUnauthorized)
 			return
 		}
 		if base64.StdEncoding.EncodeToString([]byte(accessString)) != received.AccessHash {
-			println("here 8")
-			http.Error(w, "middleware: invalid token", http.StatusUnauthorized)
+			http.Error(w, "middleware: user has not authorised", http.StatusUnauthorized)
 			return
 		}
 		next.ServeHTTP(w, r)
