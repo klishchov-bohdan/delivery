@@ -24,6 +24,7 @@ func main() {
 	tc := controller.NewTokenController(services)
 	http.HandleFunc("/login", tc.Login)
 	http.HandleFunc("/registration", tc.Registration)
+	http.HandleFunc("/refresh", tc.Refresh)
 	http.Handle("/logout", mw.AuthCheck(http.HandlerFunc(tc.Logout)))
 	http.Handle("/profile", mw.AuthCheck(http.HandlerFunc(tc.Profile)))
 	http.ListenAndServe(":8080", nil)

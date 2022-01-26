@@ -43,12 +43,8 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 			return
 		}
 		received, err := m.service.Token.GetTokenByUserID(claims.ID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-		if received == nil {
-			http.Error(w, "user has not authorized", http.StatusUnauthorized)
+		if received == nil || err != nil {
+			http.Error(w, "middleware: user has not authorized", http.StatusUnauthorized)
 			return
 		}
 		if base64.StdEncoding.EncodeToString([]byte(accessString)) != received.AccessHash {

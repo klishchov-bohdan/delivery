@@ -12,6 +12,7 @@ type UserService interface {
 	CreateUser(user *models.User) (uuid.UUID, error)
 	UpdateUser(user *models.User) (uuid.UUID, error)
 	DeleteUser(id uuid.UUID) (uuid.UUID, error)
+	CreateUserWithTokens(user *models.User, token *models.Token) (userID uuid.UUID, err error)
 }
 
 type TokenService interface {

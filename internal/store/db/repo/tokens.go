@@ -105,12 +105,16 @@ func (r *TokensRepo) UpdateToken(token *models.Token) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
+	userID, err := token.UserID.MarshalBinary()
+	if err != nil {
+		return uuid.Nil, err
+	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("UPDATE tokens SET user_id = ?, access_hash = ?, refresh_hash = ? WHERE id = ?")
 		if err != nil {
 			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(token.UserID, token.AccessHash, token.RefreshHash, uid)
+		_, err = stmt.Exec(userID, token.AccessHash, token.RefreshHash, uid)
 		if err != nil {
 			return uuid.Nil, err
 		}
@@ -120,7 +124,7 @@ func (r *TokensRepo) UpdateToken(token *models.Token) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(token.UserID, token.AccessHash, token.RefreshHash, uid)
+	_, err = stmt.Exec(userID, token.AccessHash, token.RefreshHash, uid)
 	if err != nil {
 		return uuid.Nil, err
 	}

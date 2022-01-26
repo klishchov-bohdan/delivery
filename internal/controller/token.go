@@ -42,11 +42,7 @@ func (ctr TokenController) Login(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		_, err = ctr.services.Token.DeleteTokenByUserID(user.ID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
+		_, _ = ctr.services.Token.DeleteTokenByUserID(user.ID)
 		// authenticated
 		err = godotenv.Load("config/token.env")
 		if err != nil {
@@ -109,11 +105,6 @@ func (ctr *TokenController) Registration(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		user, err := models.CreateUser(req.Name, req.Email, req.Password)
-		userID, err := ctr.services.User.CreateUser(user)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
 		// created user
 
 		err = godotenv.Load("config/token.env")
@@ -131,13 +122,13 @@ func (ctr *TokenController) Registration(w http.ResponseWriter, r *http.Request)
 		}
 		RefreshSecret := os.Getenv("RefreshSecret")
 
-		accessString, err := token.GenerateToken(userID, AccessTokenLifeTime, AccessSecret)
+		accessString, err := token.GenerateToken(user.ID, AccessTokenLifeTime, AccessSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		refreshString, err := token.GenerateToken(userID, RefreshTokenLifeTime, RefreshSecret)
+		refreshString, err := token.GenerateToken(user.ID, RefreshTokenLifeTime, RefreshSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -154,7 +145,7 @@ func (ctr *TokenController) Registration(w http.ResponseWriter, r *http.Request)
 			AccessHash:  base64.StdEncoding.EncodeToString([]byte(accessString)),
 			RefreshHash: base64.StdEncoding.EncodeToString([]byte(refreshString)),
 		}
-		_, err = ctr.services.Token.CreateToken(newToken)
+		_, err = ctr.services.User.CreateUserWithTokens(user, newToken)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -182,7 +173,7 @@ func (ctr *TokenController) Profile(w http.ResponseWriter, r *http.Request) {
 		}
 		user, err := ctr.services.User.GetUserByID(claims.ID)
 		if err != nil {
-			http.Error(w, "user not found", http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -213,4 +204,74 @@ func (ctr *TokenController) Logout(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Only GET method", http.StatusMethodNotAllowed)
 	}
+}
+
+func (ctr *TokenController) Refresh(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		err := godotenv.Load("config/token.env")
+		if err != nil {
+			http.Error(w, "Cant load .env file", http.StatusInternalServerError)
+		}
+		accessTokenLifeTime, err := strconv.Atoi(os.Getenv("AccessTokenLifeTime"))
+		if err != nil {
+			http.Error(w, "Cant convert AccessTokenLifeTime", http.StatusInternalServerError)
+		}
+		accessSecret := os.Getenv("AccessSecret")
+		refreshTokenLifeTime, err := strconv.Atoi(os.Getenv("RefreshTokenLifeTime"))
+		if err != nil {
+			http.Error(w, "Cant convert RefreshTokenLifeTime", http.StatusInternalServerError)
+		}
+		refreshSecret := os.Getenv("RefreshSecret")
+		refreshString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
+		isValid, err := token.ValidateToken(refreshString, refreshSecret)
+		if err != nil || !isValid {
+			http.Error(w, "refresh: invalid token", http.StatusUnauthorized)
+			return
+		}
+		claims, err := token.GetClaims(refreshString, refreshSecret)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		tokenDB, err := ctr.services.Token.GetTokenByUserID(claims.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if tokenDB.RefreshHash != base64.StdEncoding.EncodeToString([]byte(refreshString)) {
+			http.Error(w, "refresh: invalid token", http.StatusInternalServerError)
+			return
+		}
+		newAccessString, err := token.GenerateToken(claims.ID, accessTokenLifeTime, accessSecret)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		newRefreshString, err := token.GenerateToken(claims.ID, refreshTokenLifeTime, refreshSecret)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		resp := &models.ResponseToken{
+			Access:  newAccessString,
+			Refresh: newRefreshString,
+		}
+
+		tokenDB.AccessHash = base64.StdEncoding.EncodeToString([]byte(newAccessString))
+		tokenDB.RefreshHash = base64.StdEncoding.EncodeToString([]byte(newRefreshString))
+		_, err = ctr.services.Token.UpdateToken(tokenDB)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resp)
+
+	default:
+		http.Error(w, "Only GET method", http.StatusMethodNotAllowed)
+	}
+
 }

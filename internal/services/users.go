@@ -63,6 +63,32 @@ func (service *UsersWebService) CreateUser(user *models.User) (uuid.UUID, error)
 	return id, nil
 }
 
+func (service *UsersWebService) CreateUserWithTokens(user *models.User, token *models.Token) (userID uuid.UUID, err error) {
+	err = service.store.Users.BeginTx()
+	if err != nil {
+		return uuid.Nil, err
+	}
+	service.store.Tokens.SetTx(service.store.Users.GetTx())
+	userID, err = service.store.Users.CreateUser(user)
+	if err != nil {
+		_ = service.store.Users.RollbackTx()
+		return uuid.Nil, err
+	}
+	_, err = service.store.Tokens.CreateToken(token)
+	if err != nil {
+		_ = service.store.Tokens.RollbackTx()
+		return uuid.Nil, err
+	}
+	err = service.store.Users.CommitTx()
+	if err != nil {
+		_ = service.store.Users.RollbackTx()
+		return uuid.Nil, err
+	}
+	service.store.Users.SetTx(nil)
+	service.store.Tokens.SetTx(nil)
+	return userID, nil
+}
+
 func (service *UsersWebService) UpdateUser(user *models.User) (uuid.UUID, error) {
 	id, err := service.store.Users.UpdateUser(user)
 	if err != nil {
