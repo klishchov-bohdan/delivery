@@ -15,6 +15,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 	store := store.NewStore(db)
 	services, err := services.NewManager(store)
 	if err != nil {
