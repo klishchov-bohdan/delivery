@@ -15,17 +15,17 @@ import (
 	"strconv"
 )
 
-type TokenController struct {
+type AuthController struct {
 	services *services.Manager
 }
 
-func NewTokenController(services *services.Manager) *TokenController {
-	return &TokenController{
+func NewAuthController(services *services.Manager) *AuthController {
+	return &AuthController{
 		services: services,
 	}
 }
 
-func (ctr TokenController) Login(w http.ResponseWriter, r *http.Request) {
+func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		req := &models.UserLoginRequest{}
@@ -96,7 +96,7 @@ func (ctr TokenController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ctr *TokenController) Registration(w http.ResponseWriter, r *http.Request) {
+func (ctr *AuthController) Registration(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		req := &models.UserRegistrationRequest{}
@@ -161,30 +161,7 @@ func (ctr *TokenController) Registration(w http.ResponseWriter, r *http.Request)
 
 }
 
-func (ctr *TokenController) Profile(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
-		accessSecret := os.Getenv("AccessSecret")
-		claims, err := token.GetClaims(accessString, accessSecret)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-		user, err := ctr.services.User.GetUserByID(claims.ID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(user)
-
-	default:
-		http.Error(w, "Only GET method", http.StatusMethodNotAllowed)
-	}
-}
-
-func (ctr *TokenController) Logout(w http.ResponseWriter, r *http.Request) {
+func (ctr *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
@@ -206,7 +183,7 @@ func (ctr *TokenController) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ctr *TokenController) Refresh(w http.ResponseWriter, r *http.Request) {
+func (ctr *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		err := godotenv.Load("config/token.env")

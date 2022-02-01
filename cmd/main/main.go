@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/klishchov-bohdan/delivery/internal/controller"
-	"github.com/klishchov-bohdan/delivery/internal/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/klishchov-bohdan/delivery/internal/routes"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/store"
 	"github.com/klishchov-bohdan/delivery/internal/store/db"
@@ -21,12 +22,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	mw := middleware.NewMiddleware(services)
-	tc := controller.NewTokenController(services)
-	http.HandleFunc("/login", tc.Login)
-	http.HandleFunc("/registration", tc.Registration)
-	http.HandleFunc("/refresh", tc.Refresh)
-	http.Handle("/logout", mw.AuthCheck(http.HandlerFunc(tc.Logout)))
-	http.Handle("/profile", mw.AuthCheck(http.HandlerFunc(tc.Profile)))
-	http.ListenAndServe(":8080", nil)
+
+	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	routes.GenerateRoutes(services, r)
+
+	http.ListenAndServe(":8080", r)
 }
