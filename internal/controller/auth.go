@@ -25,6 +25,16 @@ func NewAuthController(services *services.Manager) *AuthController {
 	}
 }
 
+// Login godoc
+// @Summary Auth Login
+// @Description Auth Login
+// @Tags auth
+// @ID auth-login
+// @Accept  json
+// @Produce  json
+// @Param authLogin body models.UserLoginRequest true "Auth Login Input"
+// @Success 200 {object} models.ResponseToken
+// @Router /login [post]
 func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
@@ -96,6 +106,16 @@ func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Registration godoc
+// @Summary Auth Registration
+// @Description Auth Registration
+// @Tags auth
+// @ID auth-registration
+// @Accept  json
+// @Produce  json
+// @Param authRegistration body models.UserRegistrationRequest true "Auth Registration Input"
+// @Success 200 {object} models.ResponseToken
+// @Router /registration [post]
 func (ctr *AuthController) Registration(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":

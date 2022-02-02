@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/go-chi/chi/v5"
+	_ "github.com/klishchov-bohdan/delivery/docs"
 	"github.com/klishchov-bohdan/delivery/internal/controller"
 	"github.com/klishchov-bohdan/delivery/internal/middleware"
 	"github.com/klishchov-bohdan/delivery/internal/services"

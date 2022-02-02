@@ -1,0 +1,73 @@
+basePath: /
+definitions:
+  models.ResponseToken:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.UserLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserRegistrationRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: bogdan.bogdan2525@gmail.com
+  description: Simple swagger implementation in Go HTTP
+  title: Go Restful API with Swagger
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Auth Login
+      operationId: auth-login
+      parameters:
+      - description: Auth Login Input
+        in: body
+        name: authLogin
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseToken'
+      summary: Auth Login
+      tags:
+      - auth
+  /registration:
+    post:
+      consumes:
+      - application/json
+      description: User Profile
+      operationId: user-profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseToken'
+      summary: User Profile
+      tags:
+      - user
+swagger: "2.0"
