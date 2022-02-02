@@ -17,8 +17,8 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	store := store.NewStore(db)
-	services, err := services.NewManager(store)
+	storage := store.NewStore(db)
+	service, err := services.NewManager(storage)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	routes.GenerateRoutes(services, r)
+	routes.GenerateRoutes(service, r)
 
 	http.ListenAndServe(":8080", r)
 }
