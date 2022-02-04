@@ -7,6 +7,21 @@ definitions:
       refresh_token:
         type: string
     type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      passwordHash:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   models.UserLoginRequest:
     properties:
       email:
@@ -35,8 +50,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Auth Login
-      operationId: auth-login
+      description: Login
+      operationId: user-login
       parameters:
       - description: Auth Login Input
         in: body
@@ -51,15 +66,67 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.ResponseToken'
-      summary: Auth Login
+      summary: Login
       tags:
       - auth
-  /registration:
+  /logout:
     post:
       consumes:
       - application/json
-      description: User Profile
+      description: Logout
+      operationId: user-logout
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - ApiKeyAuth: []
+      summary: Logout
+      tags:
+      - auth
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Profile
       operationId: user-profile
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Profile
+      tags:
+      - user
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh
+      operationId: user-refresh
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -67,7 +134,32 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.ResponseToken'
-      summary: User Profile
+      security:
+      - ApiKeyAuth: []
+      summary: Refresh
       tags:
-      - user
+      - auth
+  /registration:
+    post:
+      consumes:
+      - application/json
+      description: Registration
+      operationId: user-registration
+      parameters:
+      - description: Auth Registration Input
+        in: body
+        name: authRegistration
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseToken'
+      summary: Registration
+      tags:
+      - auth
 swagger: "2.0"

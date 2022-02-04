@@ -22,6 +22,10 @@ func NewMiddleware(service *services.Manager) *Middleware {
 func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
+		if accessString == "" {
+			http.Error(w, "middleware: invalid bearer string", http.StatusUnauthorized)
+			return
+		}
 		err := godotenv.Load("config/token.env")
 		if err != nil {
 			http.Error(w, "Cant load token.env file", http.StatusInternalServerError)
@@ -30,7 +34,7 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 		accessSecret := os.Getenv("AccessSecret")
 		isValid, err := token.ValidateToken(accessString, accessSecret)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "middleware: invalid token", http.StatusUnauthorized)
 			return
 		}
 		if !isValid {
@@ -39,7 +43,7 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 		}
 		claims, err := token.GetClaims(accessString, accessSecret)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "middleware: can`t cet claims", http.StatusUnauthorized)
 			return
 		}
 		received, err := m.service.Token.GetTokenByUserID(claims.ID)

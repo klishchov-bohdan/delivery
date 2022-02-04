@@ -18,7 +18,18 @@ func NewUserController(services *services.Manager) *UserController {
 	}
 }
 
-func (ctr *UserController) Profile(w http.ResponseWriter, r *http.Request) {
+// GetProfile godoc
+// @Summary Profile
+// @Description Profile
+// @Tags user
+// @ID user-profile
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Authorization"
+// @Success 200 {object} models.User
+// @Security ApiKeyAuth
+// @Router /profile [get]
+func (ctr *UserController) GetProfile(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))

@@ -26,10 +26,10 @@ func NewAuthController(services *services.Manager) *AuthController {
 }
 
 // Login godoc
-// @Summary Auth Login
-// @Description Auth Login
+// @Summary Login
+// @Description Login
 // @Tags auth
-// @ID auth-login
+// @ID user-login
 // @Accept  json
 // @Produce  json
 // @Param authLogin body models.UserLoginRequest true "Auth Login Input"
@@ -107,10 +107,10 @@ func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // Registration godoc
-// @Summary Auth Registration
-// @Description Auth Registration
+// @Summary Registration
+// @Description Registration
 // @Tags auth
-// @ID auth-registration
+// @ID user-registration
 // @Accept  json
 // @Produce  json
 // @Param authRegistration body models.UserRegistrationRequest true "Auth Registration Input"
@@ -181,9 +181,20 @@ func (ctr *AuthController) Registration(w http.ResponseWriter, r *http.Request) 
 
 }
 
+// Logout godoc
+// @Summary Logout
+// @Description Logout
+// @Tags auth
+// @ID user-logout
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Authorization"
+// @Success 200
+// @Security ApiKeyAuth
+// @Router /logout [post]
 func (ctr *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case "GET":
+	case "POST":
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
 		accessSecret := os.Getenv("AccessSecret")
 		claims, err := token.GetClaims(accessString, accessSecret)
@@ -203,9 +214,20 @@ func (ctr *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Refresh godoc
+// @Summary Refresh
+// @Description Refresh
+// @Tags auth
+// @ID user-refresh
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Authorization"
+// @Success 200 {object} models.ResponseToken
+// @Security ApiKeyAuth
+// @Router /refresh [post]
 func (ctr *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case "GET":
+	case "POST":
 		err := godotenv.Load("config/token.env")
 		if err != nil {
 			http.Error(w, "Cant load .env file", http.StatusInternalServerError)

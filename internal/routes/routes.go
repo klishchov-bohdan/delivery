@@ -13,8 +13,8 @@ func GenerateRoutes(services *services.Manager, r *chi.Mux) {
 	mw := middleware.NewMiddleware(services)
 	r.Post("/login", ctr.Auth.Login)
 	r.Post("/registration", ctr.Auth.Registration)
-	r.Get("/refresh", ctr.Auth.Refresh)
-	r.With(mw.AuthCheck).Get("/logout", ctr.Auth.Logout)
+	r.Post("/refresh", ctr.Auth.Refresh)
+	r.With(mw.AuthCheck).Post("/logout", ctr.Auth.Logout)
 
-	r.With(mw.AuthCheck).Get("/profile", ctr.User.Profile)
+	r.With(mw.AuthCheck).Get("/profile", ctr.User.GetProfile)
 }
