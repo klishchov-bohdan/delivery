@@ -94,3 +94,48 @@ func (ts *TokensTestSuite) TestValidateAccessToken() {
 		})
 	}
 }
+
+func (ts *TokensTestSuite) TestValidateRefreshToken() {
+	// preparation
+	userID := uuid.New()
+	refreshString, _ := token.GenerateToken(userID, ts.cfg.RefreshTokenLifeTime, ts.cfg.RefreshSecret)
+	refreshStringWithAccessSecret, _ := token.GenerateToken(userID, ts.cfg.RefreshTokenLifeTime, ts.cfg.AccessSecret)
+	refreshExpiredString, _ := token.GenerateToken(userID, -1, ts.cfg.RefreshSecret)
+	testCases := []helper.TestCaseValidateToken{
+		{
+			Name:            "Valid refresh token string",
+			TokenString:     refreshString,
+			IsValidExpected: true,
+		},
+		{
+			Name:            "Invalid refresh token string",
+			TokenString:     refreshString + "hello_world",
+			IsValidExpected: false,
+		},
+		{
+			Name:            "Valid refresh token signed with access secret",
+			TokenString:     refreshStringWithAccessSecret,
+			IsValidExpected: false,
+		},
+		{
+			Name:            "Expired refresh token",
+			TokenString:     refreshExpiredString,
+			IsValidExpected: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		ts.T().Run(testCase.Name, func(t *testing.T) {
+			isValid, _ := token.ValidateToken(testCase.TokenString, ts.cfg.RefreshSecret)
+			claims, _ := token.GetClaims(testCase.TokenString, ts.cfg.RefreshSecret)
+			if testCase.IsValidExpected {
+				assert.True(t, isValid)
+				assert.NotNil(t, claims)
+				assert.Equal(t, userID, claims.ID)
+			} else {
+				assert.False(t, isValid)
+				assert.Nil(t, claims)
+			}
+		})
+	}
+}
