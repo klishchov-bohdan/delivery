@@ -48,83 +48,83 @@ func (r *SuppliersRepo) GetSupplierByID(id uuid.UUID) (*models.Supplier, error) 
 	return &supplier, nil
 }
 
-func (r *SuppliersRepo) CreateSupplier(supplier *models.Supplier) (err error) {
+func (r *SuppliersRepo) CreateSupplier(supplier *models.Supplier) (uuid.UUID, error) {
 	if supplier == nil {
-		return errors.New("no supplier provided")
+		return uuid.Nil, errors.New("no supplier provided")
 	}
 	uid, err := supplier.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("INSERT INTO suppliers(id, name, description) VALUES(?, ?, ?)")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
 		_, err = stmt.Exec(uid, supplier.Name, supplier.Description)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return supplier.ID, nil
 	}
 	stmt, err := r.DB.Prepare("INSERT INTO suppliers(id, name, description) VALUES(?, ?, ?)")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(uid, supplier.Name, supplier.Description)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return supplier.ID, nil
 }
 
-func (r *SuppliersRepo) UpdateSupplier(supplier *models.Supplier) (err error) {
+func (r *SuppliersRepo) UpdateSupplier(supplier *models.Supplier) (uuid.UUID, error) {
 	if supplier == nil {
-		return errors.New("no supplier provided")
+		return uuid.Nil, errors.New("no supplier provided")
 	}
 	uid, err := supplier.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("UPDATE suppliers SET name = ?, description = ? WHERE id = ?")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
 		_, err = stmt.Exec(supplier.Name, supplier.Description, uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return supplier.ID, nil
 	}
 	stmt, err := r.DB.Prepare("UPDATE suppliers SET name = ?, description = ? WHERE id = ?")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(supplier.Name, supplier.Description, uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return supplier.ID, nil
 }
 
-func (r *SuppliersRepo) DeleteSupplier(id uuid.UUID) (err error) {
+func (r *SuppliersRepo) DeleteSupplier(id uuid.UUID) (uuid.UUID, error) {
 	uid, err := id.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM suppliers WHERE id = ?", uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM suppliers WHERE id = ?", uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return id, nil
 }
 
 func (r *SuppliersRepo) BeginTx() error {

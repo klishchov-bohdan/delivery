@@ -5,6 +5,7 @@ import (
 	"github.com/klishchov-bohdan/delivery/internal/models"
 )
 
+//go:generate mockgen --destination=mocks/users.go --package=mocks github.com/klishchov-bohdan/delivery/internal/services UserService
 type UserService interface {
 	GetAllUsers() (*[]models.User, error)
 	GetUserByID(id uuid.UUID) (*models.User, error)
@@ -15,6 +16,7 @@ type UserService interface {
 	CreateUserWithTokens(user *models.User, token *models.Token) (userID uuid.UUID, err error)
 }
 
+//go:generate mockgen --destination=mocks/tokens.go --package=mocks github.com/klishchov-bohdan/delivery/internal/services TokenService
 type TokenService interface {
 	GetTokenByID(id uuid.UUID) (*models.Token, error)
 	GetTokenByUserID(id uuid.UUID) (*models.Token, error)

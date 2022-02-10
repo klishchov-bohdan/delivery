@@ -78,53 +78,53 @@ func (r *ShippingAddressesRepo) CreateShippingAddress(address *models.ShippingAd
 	return address.ID, nil
 }
 
-func (r *ShippingAddressesRepo) UpdateShippingAddress(address *models.ShippingAddress) (err error) {
+func (r *ShippingAddressesRepo) UpdateShippingAddress(address *models.ShippingAddress) (uuid.UUID, error) {
 	if address == nil {
-		return errors.New("no address provided")
+		return uuid.Nil, errors.New("no address provided")
 	}
 	uid, err := address.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("UPDATE shipping_addresses SET zip_code = ?, country = ?, region = ?, street = ? WHERE id = ?")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
 		_, err = stmt.Exec(address.ZIPCode, address.Country, address.Region, address.Street, uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return address.ID, nil
 	}
 	stmt, err := r.DB.Prepare("UPDATE shipping_addresses SET zip_code = ?, country = ?, region = ?, street = ? WHERE id = ?")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(address.ZIPCode, address.Country, address.Region, address.Street, uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return address.ID, nil
 }
 
-func (r *ShippingAddressesRepo) DeleteShippingAddress(id uuid.UUID) (err error) {
+func (r *ShippingAddressesRepo) DeleteShippingAddress(id uuid.UUID) (uuid.UUID, error) {
 	uid, err := id.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM shipping_addresses WHERE id = ?", uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM shipping_addresses WHERE id = ?", uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return id, nil
 }
 
 func (r *ShippingAddressesRepo) BeginTx() error {

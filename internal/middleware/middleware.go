@@ -2,11 +2,10 @@ package middleware
 
 import (
 	"encoding/base64"
-	"github.com/joho/godotenv"
+	"github.com/klishchov-bohdan/delivery/config"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/token"
 	"net/http"
-	"os"
 )
 
 type Middleware struct {
@@ -26,13 +25,8 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 			http.Error(w, "middleware: invalid bearer string", http.StatusUnauthorized)
 			return
 		}
-		err := godotenv.Load("config/token.env")
-		if err != nil {
-			http.Error(w, "Cant load token.env file", http.StatusInternalServerError)
-			return
-		}
-		accessSecret := os.Getenv("AccessSecret")
-		isValid, err := token.ValidateToken(accessString, accessSecret)
+		cfg := config.NewConfig()
+		isValid, err := token.ValidateToken(accessString, cfg.AccessSecret)
 		if err != nil {
 			http.Error(w, "middleware: invalid token", http.StatusUnauthorized)
 			return
@@ -41,7 +35,7 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 			http.Error(w, "middleware: invalid token", http.StatusUnauthorized)
 			return
 		}
-		claims, err := token.GetClaims(accessString, accessSecret)
+		claims, err := token.GetClaims(accessString, cfg.AccessSecret)
 		if err != nil {
 			http.Error(w, "middleware: can`t cet claims", http.StatusUnauthorized)
 			return

@@ -5,14 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
+	"github.com/klishchov-bohdan/delivery/config"
 	"github.com/klishchov-bohdan/delivery/internal/models"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/token"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"os"
-	"strconv"
 )
 
 type AuthController struct {
@@ -54,31 +52,15 @@ func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		_, _ = ctr.services.Token.DeleteTokenByUserID(user.ID)
 		// authenticated
-		err = godotenv.Load("config/token.env")
-		if err != nil {
-			http.Error(w, "Cant load token.env file", http.StatusInternalServerError)
-			return
-		}
-		AccessTokenLifeTime, err := strconv.Atoi(os.Getenv("AccessTokenLifeTime"))
-		if err != nil {
-			http.Error(w, "Cant convert AccessTokenLifeTime", http.StatusInternalServerError)
-			return
-		}
-		AccessSecret := os.Getenv("AccessSecret")
-		RefreshTokenLifeTime, err := strconv.Atoi(os.Getenv("RefreshTokenLifeTime"))
-		if err != nil {
-			http.Error(w, "Cant convert RefreshTokenLifeTime", http.StatusInternalServerError)
-			return
-		}
-		RefreshSecret := os.Getenv("RefreshSecret")
+		cfg := config.NewConfig()
 
-		accessString, err := token.GenerateToken(user.ID, AccessTokenLifeTime, AccessSecret)
+		accessString, err := token.GenerateToken(user.ID, cfg.AccessTokenLifeTime, cfg.AccessSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		refreshString, err := token.GenerateToken(user.ID, RefreshTokenLifeTime, RefreshSecret)
+		refreshString, err := token.GenerateToken(user.ID, cfg.RefreshTokenLifeTime, cfg.RefreshSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -126,29 +108,14 @@ func (ctr *AuthController) Registration(w http.ResponseWriter, r *http.Request) 
 		}
 		user, err := models.CreateUser(req.Name, req.Email, req.Password)
 		// created user
-
-		err = godotenv.Load("config/token.env")
-		if err != nil {
-			http.Error(w, "Cant load .env file", http.StatusInternalServerError)
-		}
-		AccessTokenLifeTime, err := strconv.Atoi(os.Getenv("AccessTokenLifeTime"))
-		if err != nil {
-			http.Error(w, "Cant convert AccessTokenLifeTime", http.StatusInternalServerError)
-		}
-		AccessSecret := os.Getenv("AccessSecret")
-		RefreshTokenLifeTime, err := strconv.Atoi(os.Getenv("RefreshTokenLifeTime"))
-		if err != nil {
-			http.Error(w, "Cant convert RefreshTokenLifeTime", http.StatusInternalServerError)
-		}
-		RefreshSecret := os.Getenv("RefreshSecret")
-
-		accessString, err := token.GenerateToken(user.ID, AccessTokenLifeTime, AccessSecret)
+		cfg := config.NewConfig()
+		accessString, err := token.GenerateToken(user.ID, cfg.AccessTokenLifeTime, cfg.AccessSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		refreshString, err := token.GenerateToken(user.ID, RefreshTokenLifeTime, RefreshSecret)
+		refreshString, err := token.GenerateToken(user.ID, cfg.RefreshTokenLifeTime, cfg.RefreshSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -196,8 +163,8 @@ func (ctr *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
-		accessSecret := os.Getenv("AccessSecret")
-		claims, err := token.GetClaims(accessString, accessSecret)
+		cfg := config.NewConfig()
+		claims, err := token.GetClaims(accessString, cfg.AccessSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
@@ -228,27 +195,14 @@ func (ctr *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 func (ctr *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		err := godotenv.Load("config/token.env")
-		if err != nil {
-			http.Error(w, "Cant load .env file", http.StatusInternalServerError)
-		}
-		accessTokenLifeTime, err := strconv.Atoi(os.Getenv("AccessTokenLifeTime"))
-		if err != nil {
-			http.Error(w, "Cant convert AccessTokenLifeTime", http.StatusInternalServerError)
-		}
-		accessSecret := os.Getenv("AccessSecret")
-		refreshTokenLifeTime, err := strconv.Atoi(os.Getenv("RefreshTokenLifeTime"))
-		if err != nil {
-			http.Error(w, "Cant convert RefreshTokenLifeTime", http.StatusInternalServerError)
-		}
-		refreshSecret := os.Getenv("RefreshSecret")
+		cfg := config.NewConfig()
 		refreshString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
-		isValid, err := token.ValidateToken(refreshString, refreshSecret)
+		isValid, err := token.ValidateToken(refreshString, cfg.RefreshSecret)
 		if err != nil || !isValid {
 			http.Error(w, "refresh: invalid token", http.StatusUnauthorized)
 			return
 		}
-		claims, err := token.GetClaims(refreshString, refreshSecret)
+		claims, err := token.GetClaims(refreshString, cfg.RefreshSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
@@ -262,12 +216,12 @@ func (ctr *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "refresh: invalid token", http.StatusInternalServerError)
 			return
 		}
-		newAccessString, err := token.GenerateToken(claims.ID, accessTokenLifeTime, accessSecret)
+		newAccessString, err := token.GenerateToken(claims.ID, cfg.AccessTokenLifeTime, cfg.AccessSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		newRefreshString, err := token.GenerateToken(claims.ID, refreshTokenLifeTime, refreshSecret)
+		newRefreshString, err := token.GenerateToken(claims.ID, cfg.RefreshTokenLifeTime, cfg.RefreshSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
