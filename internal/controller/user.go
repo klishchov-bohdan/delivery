@@ -2,19 +2,21 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/klishchov-bohdan/delivery/config"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/token"
 	"net/http"
-	"os"
 )
 
 type UserController struct {
 	services *services.Manager
+	cfg      *config.Config
 }
 
-func NewUserController(services *services.Manager) *UserController {
+func NewUserController(services *services.Manager, cfg *config.Config) *UserController {
 	return &UserController{
 		services: services,
+		cfg:      cfg,
 	}
 }
 
@@ -33,8 +35,7 @@ func (ctr *UserController) GetProfile(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
-		accessSecret := os.Getenv("AccessSecret")
-		claims, err := token.GetClaims(accessString, accessSecret)
+		claims, err := token.GetClaims(accessString, ctr.cfg.AccessSecret)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return

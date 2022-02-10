@@ -2,14 +2,15 @@ package routes
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/klishchov-bohdan/delivery/config"
 	_ "github.com/klishchov-bohdan/delivery/docs"
 	"github.com/klishchov-bohdan/delivery/internal/controller"
 	"github.com/klishchov-bohdan/delivery/internal/middleware"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 )
 
-func GenerateRoutes(services *services.Manager, r *chi.Mux) {
-	ctr := controller.NewController(services)
+func GenerateRoutes(services *services.Manager, cfg *config.Config, r *chi.Mux) {
+	ctr := controller.NewController(services, cfg)
 	mw := middleware.NewMiddleware(services)
 	r.Post("/login", ctr.Auth.Login)
 	r.Post("/registration", ctr.Auth.Registration)

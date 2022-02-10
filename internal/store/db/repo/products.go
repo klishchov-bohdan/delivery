@@ -48,83 +48,83 @@ func (r *ProductRepo) GetProductByID(id uuid.UUID) (*models.Product, error) {
 	return &product, nil
 }
 
-func (r *ProductRepo) CreateProduct(product *models.Product) (err error) {
+func (r *ProductRepo) CreateProduct(product *models.Product) (uuid.UUID, error) {
 	if product == nil {
-		return errors.New("no product provided")
+		return uuid.Nil, errors.New("no product provided")
 	}
 	uid, err := product.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("INSERT INTO products(id, supplier_id, name, description, price, weight) VALUES(?, ?, ?, ?, ?, ?)")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
 		_, err = stmt.Exec(uid, product.SupplierID, product.Name, product.Description, product.Price, product.Weight)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return product.ID, nil
 	}
 	stmt, err := r.DB.Prepare("INSERT INTO products(id, supplier_id, name, description, price, weight) VALUES(?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(uid, product.SupplierID, product.Name, product.Description, product.Price, product.Weight)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return product.ID, nil
 }
 
-func (r *ProductRepo) UpdateProduct(product *models.Product) (err error) {
+func (r *ProductRepo) UpdateProduct(product *models.Product) (uuid.UUID, error) {
 	if product == nil {
-		return errors.New("no product provided")
+		return uuid.Nil, errors.New("no product provided")
 	}
 	uid, err := product.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		stmt, err := r.TX.Prepare("UPDATE products SET supplier_id = ?, name = ?, description = ?, price = ?, weight = ? WHERE id = ?")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
 		_, err = stmt.Exec(product.SupplierID, product.Name, product.Description, product.Price, product.Weight, uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return product.ID, nil
 	}
 	stmt, err := r.DB.Prepare("UPDATE products SET supplier_id = ?, name = ?, description = ?, price = ?, weight = ? WHERE id = ?")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	_, err = stmt.Exec(product.SupplierID, product.Name, product.Description, product.Price, product.Weight, uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return product.ID, nil
 }
 
-func (r *ProductRepo) DeleteProduct(id uuid.UUID) (err error) {
+func (r *ProductRepo) DeleteProduct(id uuid.UUID) (uuid.UUID, error) {
 	uid, err := id.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM products WHERE id = ?", uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM products WHERE id = ?", uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return id, nil
 }
 
 func (r *ProductRepo) BeginTx() error {

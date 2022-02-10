@@ -15,8 +15,8 @@ type TokensTestSuite struct {
 	cfg *config.Config
 }
 
-func (ts *TokensTestSuite) SetupSuite() {
-	ts.cfg = &config.Config{
+func (suite *TokensTestSuite) SetupSuite() {
+	suite.cfg = &config.Config{
 		AccessSecret:         "access_secret",
 		RefreshSecret:        "refresh_secret",
 		AccessTokenLifeTime:  1,
@@ -28,7 +28,7 @@ func TestTokenService(t *testing.T) {
 	suite.Run(t, new(TokensTestSuite))
 }
 
-func (ts *TokensTestSuite) TestGetTokenFromBearerString() {
+func (suite *TokensTestSuite) TestGetTokenFromBearerString() {
 	testCases := []helper.TestCaseGetBearerString{
 		{
 			Name:         "Get token successful",
@@ -43,19 +43,19 @@ func (ts *TokensTestSuite) TestGetTokenFromBearerString() {
 	}
 
 	for _, testCase := range testCases {
-		ts.T().Run(testCase.Name, func(t *testing.T) {
+		suite.T().Run(testCase.Name, func(t *testing.T) {
 			actual := token.GetTokenFromBearerString(testCase.BearerString)
 			assert.Equal(t, testCase.Expected, actual)
 		})
 	}
 }
 
-func (ts *TokensTestSuite) TestValidateAccessToken() {
+func (suite *TokensTestSuite) TestValidateAccessToken() {
 	// preparation
 	userID := uuid.New()
-	accessString, _ := token.GenerateToken(userID, ts.cfg.AccessTokenLifeTime, ts.cfg.AccessSecret)
-	accessStringWithRefreshSecret, _ := token.GenerateToken(userID, ts.cfg.AccessTokenLifeTime, ts.cfg.RefreshSecret)
-	accessExpiredString, _ := token.GenerateToken(userID, -1, ts.cfg.AccessSecret)
+	accessString, _ := token.GenerateToken(userID, suite.cfg.AccessTokenLifeTime, suite.cfg.AccessSecret)
+	accessStringWithRefreshSecret, _ := token.GenerateToken(userID, suite.cfg.AccessTokenLifeTime, suite.cfg.RefreshSecret)
+	accessExpiredString, _ := token.GenerateToken(userID, -1, suite.cfg.AccessSecret)
 	testCases := []helper.TestCaseValidateToken{
 		{
 			Name:            "Valid access token string",
@@ -80,9 +80,9 @@ func (ts *TokensTestSuite) TestValidateAccessToken() {
 	}
 
 	for _, testCase := range testCases {
-		ts.T().Run(testCase.Name, func(t *testing.T) {
-			isValid, _ := token.ValidateToken(testCase.TokenString, ts.cfg.AccessSecret)
-			claims, _ := token.GetClaims(testCase.TokenString, ts.cfg.AccessSecret)
+		suite.T().Run(testCase.Name, func(t *testing.T) {
+			isValid, _ := token.ValidateToken(testCase.TokenString, suite.cfg.AccessSecret)
+			claims, _ := token.GetClaims(testCase.TokenString, suite.cfg.AccessSecret)
 			if testCase.IsValidExpected {
 				assert.True(t, isValid)
 				assert.NotNil(t, claims)
@@ -95,12 +95,12 @@ func (ts *TokensTestSuite) TestValidateAccessToken() {
 	}
 }
 
-func (ts *TokensTestSuite) TestValidateRefreshToken() {
+func (suite *TokensTestSuite) TestValidateRefreshToken() {
 	// preparation
 	userID := uuid.New()
-	refreshString, _ := token.GenerateToken(userID, ts.cfg.RefreshTokenLifeTime, ts.cfg.RefreshSecret)
-	refreshStringWithAccessSecret, _ := token.GenerateToken(userID, ts.cfg.RefreshTokenLifeTime, ts.cfg.AccessSecret)
-	refreshExpiredString, _ := token.GenerateToken(userID, -1, ts.cfg.RefreshSecret)
+	refreshString, _ := token.GenerateToken(userID, suite.cfg.RefreshTokenLifeTime, suite.cfg.RefreshSecret)
+	refreshStringWithAccessSecret, _ := token.GenerateToken(userID, suite.cfg.RefreshTokenLifeTime, suite.cfg.AccessSecret)
+	refreshExpiredString, _ := token.GenerateToken(userID, -1, suite.cfg.RefreshSecret)
 	testCases := []helper.TestCaseValidateToken{
 		{
 			Name:            "Valid refresh token string",
@@ -125,9 +125,9 @@ func (ts *TokensTestSuite) TestValidateRefreshToken() {
 	}
 
 	for _, testCase := range testCases {
-		ts.T().Run(testCase.Name, func(t *testing.T) {
-			isValid, _ := token.ValidateToken(testCase.TokenString, ts.cfg.RefreshSecret)
-			claims, _ := token.GetClaims(testCase.TokenString, ts.cfg.RefreshSecret)
+		suite.T().Run(testCase.Name, func(t *testing.T) {
+			isValid, _ := token.ValidateToken(testCase.TokenString, suite.cfg.RefreshSecret)
+			claims, _ := token.GetClaims(testCase.TokenString, suite.cfg.RefreshSecret)
 			if testCase.IsValidExpected {
 				assert.True(t, isValid)
 				assert.NotNil(t, claims)
