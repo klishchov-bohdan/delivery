@@ -26,6 +26,13 @@ type UserRegistrationRequest struct {
 	Password string `json:"password"`
 }
 
+type UserToUpdate struct {
+	ID       uuid.UUID
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 func CreateUser(name, email, password string) (*User, error) {
 	pwdHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {

@@ -38,6 +38,17 @@ definitions:
       password:
         type: string
     type: object
+  models.UserToUpdate:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -114,7 +125,36 @@ paths:
       - ApiKeyAuth: []
       summary: Profile
       tags:
-      - user
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update Profile
+      operationId: user-update-profile
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Update Profile Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserToUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Profile
+      tags:
+      - users
   /refresh:
     post:
       consumes:
@@ -162,4 +202,109 @@ paths:
       summary: Registration
       tags:
       - auth
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get Users
+      operationId: get-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Get Users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create User
+      operationId: create-user
+      parameters:
+      - description: Create User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Create User
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update User
+      operationId: update-user
+      parameters:
+      - description: Update User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserToUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Update User
+      tags:
+      - users
+  /users/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete User
+      operationId: delete-user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Delete User
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get User
+      operationId: get-user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Get User
+      tags:
+      - users
 swagger: "2.0"

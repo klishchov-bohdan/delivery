@@ -18,4 +18,10 @@ func GenerateRoutes(services *services.Manager, cfg *config.Config, r *chi.Mux) 
 	r.With(mw.AuthCheck).Post("/logout", ctr.Auth.Logout)
 
 	r.With(mw.AuthCheck).Get("/profile", ctr.User.GetProfile)
+	r.With(mw.AuthCheck).Put("/profile", ctr.User.UpdateProfile)
+	r.Get("/users/{userId}", ctr.User.GetUser)
+	r.Get("/users", ctr.User.GetAllUsers)
+	r.Post("/users", ctr.User.CreateUser)
+	r.Put("/users", ctr.User.UpdateUser)
+	r.Delete("/users/{userId}", ctr.User.DeleteUser)
 }
