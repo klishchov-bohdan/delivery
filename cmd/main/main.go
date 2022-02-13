@@ -23,6 +23,7 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
+	//ws := models.NewWorkingSchedule(time.Date(0, 0, 0, 5, 20, 0, 0, time.Local), time.Date(0, 0, 0, 14, 20, 0, 0, time.Local), []time.Weekday{time.Monday, time.Friday})
 	db, err := db.Dial()
 	if err != nil {
 		log.Fatal(err)

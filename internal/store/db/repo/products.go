@@ -33,6 +33,23 @@ func (r *ProductRepo) GetAllProducts() (*[]models.Product, error) {
 	return &products, nil
 }
 
+func (r *ProductRepo) GetProductsBySupplierID(supplierID uuid.UUID) (*[]models.Product, error) {
+	var products []models.Product
+	rows, err := r.DB.Query("SELECT id, supplier_id, name, image, description, price, weight, created_at, updated_at FROM products WHERE supplier_id = ?", supplierID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var product models.Product
+		err = rows.Scan(&product.ID, &product.SupplierID, &product.Name, &product.Image, &product.Description, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, product)
+	}
+	return &products, nil
+}
+
 func (r *ProductRepo) GetProductByID(id uuid.UUID) (*models.Product, error) {
 	var product models.Product
 	uid, err := id.MarshalBinary()
@@ -121,6 +138,25 @@ func (r *ProductRepo) DeleteProduct(id uuid.UUID) (uuid.UUID, error) {
 		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM products WHERE id = ?", uid)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return id, nil
+}
+
+func (r *ProductRepo) DeleteProductsBySupplierID(id uuid.UUID) (uuid.UUID, error) {
+	uid, err := id.MarshalBinary()
+	if err != nil {
+		return uuid.Nil, err
+	}
+	if r.TX != nil {
+		_, err = r.TX.Exec("DELETE FROM products WHERE supplier_id = ?", uid)
+		if err != nil {
+			return uuid.Nil, err
+		}
+		return id, nil
+	}
+	_, err = r.DB.Exec("DELETE FROM products WHERE supplier_id = ?", uid)
 	if err != nil {
 		return uuid.Nil, err
 	}
