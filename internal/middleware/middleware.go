@@ -52,3 +52,11 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (m *Middleware) SetCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cfg := config.NewConfig()
+		w.Header().Set("Access-Control-Allow-Origin", cfg.AccessControlAllowOrigin)
+		next.ServeHTTP(w, r)
+	})
+}

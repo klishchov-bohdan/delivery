@@ -18,13 +18,34 @@ func NewProductMySQL(db *sql.DB) *ProductRepo {
 
 func (r *ProductRepo) GetAllProducts() (*[]models.Product, error) {
 	var products []models.Product
-	rows, err := r.DB.Query("SELECT id, supplier_id, name, image, description, price, weight, created_at, updated_at FROM products")
+	rows, err := r.DB.Query("SELECT id, supplier_id, name, image, description, type, price, weight, created_at, updated_at FROM products")
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var product models.Product
-		err = rows.Scan(&product.ID, &product.SupplierID, &product.Name, &product.Image, &product.Description, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
+		err = rows.Scan(&product.ID, &product.SupplierID, &product.Name, &product.Image, &product.Description, &product.Type, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, product)
+	}
+	return &products, nil
+}
+
+func (r *ProductRepo) GetProductsBySupplierID(supplierID uuid.UUID) (*[]models.Product, error) {
+	var products []models.Product
+	uid, err := supplierID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.DB.Query("SELECT id, supplier_id, name, image, description, type, price, weight, created_at, updated_at FROM products WHERE supplier_id = ?", uid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var product models.Product
+		err = rows.Scan(&product.ID, &product.SupplierID, &product.Name, &product.Image, &product.Description, &product.Type, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -40,8 +61,8 @@ func (r *ProductRepo) GetProductByID(id uuid.UUID) (*models.Product, error) {
 		return nil, err
 	}
 	err = r.DB.QueryRow(
-		"SELECT id, supplier_id, name, image, description, price, weight, created_at, updated_at FROM products WHERE id = ?", uid).
-		Scan(&product.ID, &product.SupplierID, &product.Name, &product.Image, &product.Description, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
+		"SELECT id, supplier_id, name, image, description, type, price, weight, created_at, updated_at FROM products WHERE id = ?", uid).
+		Scan(&product.ID, &product.SupplierID, &product.Name, &product.Image, &product.Description, &product.Type, &product.Price, &product.Weight, &product.CreatedAt, &product.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -56,22 +77,26 @@ func (r *ProductRepo) CreateProduct(product *models.Product) (uuid.UUID, error) 
 	if err != nil {
 		return uuid.Nil, err
 	}
+	supplierID, err := product.SupplierID.MarshalBinary()
+	if err != nil {
+		return uuid.Nil, err
+	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("INSERT INTO products(id, supplier_id, name, image, description, price, weight) VALUES(?, ?, ?, ?, ?, ?, ?)")
+		stmt, err := r.TX.Prepare("INSERT INTO products(id, supplier_id, name, image, description, type, price, weight) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(uid, product.SupplierID, product.Name, product.Image, product.Description, product.Price, product.Weight)
+		_, err = stmt.Exec(uid, supplierID, product.Name, product.Image, product.Description, product.Type, product.Price, product.Weight)
 		if err != nil {
 			return uuid.Nil, err
 		}
 		return product.ID, nil
 	}
-	stmt, err := r.DB.Prepare("INSERT INTO products(id, supplier_id, name, image, description, price, weight) VALUES(?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := r.DB.Prepare("INSERT INTO products(id, supplier_id, name, image, description, type, price, weight) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(uid, product.SupplierID, product.Name, product.Image, product.Description, product.Price, product.Weight)
+	_, err = stmt.Exec(uid, supplierID, product.Name, product.Image, product.Description, product.Type, product.Price, product.Weight)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -86,22 +111,26 @@ func (r *ProductRepo) UpdateProduct(product *models.Product) (uuid.UUID, error) 
 	if err != nil {
 		return uuid.Nil, err
 	}
+	supplierID, err := product.SupplierID.MarshalBinary()
+	if err != nil {
+		return uuid.Nil, err
+	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("UPDATE products SET supplier_id = ?, name = ?, image = ?, description = ?, price = ?, weight = ? WHERE id = ?")
+		stmt, err := r.TX.Prepare("UPDATE products SET supplier_id = ?, name = ?, image = ?, description = ?, type = ?, price = ?, weight = ? WHERE id = ?")
 		if err != nil {
 			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(product.SupplierID, product.Name, product.Image, product.Description, product.Price, product.Weight, uid)
+		_, err = stmt.Exec(supplierID, product.Name, product.Image, product.Description, product.Type, product.Price, product.Weight, uid)
 		if err != nil {
 			return uuid.Nil, err
 		}
 		return product.ID, nil
 	}
-	stmt, err := r.DB.Prepare("UPDATE products SET supplier_id = ?, name = ?, image = ?, description = ?, price = ?, weight = ? WHERE id = ?")
+	stmt, err := r.DB.Prepare("UPDATE products SET supplier_id = ?, name = ?, image = ?, description = ?, type = ?, price = ?, weight = ? WHERE id = ?")
 	if err != nil {
 		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(product.SupplierID, product.Name, product.Image, product.Description, product.Price, product.Weight, uid)
+	_, err = stmt.Exec(supplierID, product.Name, product.Image, product.Description, product.Type, product.Price, product.Weight, uid)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -121,6 +150,25 @@ func (r *ProductRepo) DeleteProduct(id uuid.UUID) (uuid.UUID, error) {
 		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM products WHERE id = ?", uid)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return id, nil
+}
+
+func (r *ProductRepo) DeleteProductsBySupplierID(id uuid.UUID) (uuid.UUID, error) {
+	uid, err := id.MarshalBinary()
+	if err != nil {
+		return uuid.Nil, err
+	}
+	if r.TX != nil {
+		_, err = r.TX.Exec("DELETE FROM products WHERE supplier_id = ?", uid)
+		if err != nil {
+			return uuid.Nil, err
+		}
+		return id, nil
+	}
+	_, err = r.DB.Exec("DELETE FROM products WHERE supplier_id = ?", uid)
 	if err != nil {
 		return uuid.Nil, err
 	}

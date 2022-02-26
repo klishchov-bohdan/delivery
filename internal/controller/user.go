@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/klishchov-bohdan/delivery/config"
 	"github.com/klishchov-bohdan/delivery/internal/models"
+	"github.com/klishchov-bohdan/delivery/internal/requests"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/token"
 	"io/ioutil"
@@ -65,7 +66,7 @@ func (ctr *UserController) GetProfile(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Authorization"
-// @Param user body models.UserToUpdate true "Update Profile Input"
+// @Param user body requests.UpdateUserRequest true "Update Profile Input"
 // @Success 200 {object} models.User
 // @Security ApiKeyAuth
 // @Router /profile [put]
@@ -85,7 +86,7 @@ func (ctr *UserController) UpdateProfile(w http.ResponseWriter, r *http.Request)
 		}
 		body, _ := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
-		var userReq models.UserToUpdate
+		var userReq requests.UpdateUserRequest
 		err = json.Unmarshal(body, &userReq)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -180,7 +181,7 @@ func (ctr *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		body, _ := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
-		var userReq models.UserRegistrationRequest
+		var userReq requests.UserRegistrationRequest
 		err := json.Unmarshal(body, &userReq)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -207,7 +208,7 @@ func (ctr *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @ID update-user
 // @Accept  json
 // @Produce  json
-// @Param user body models.UserToUpdate true "Update User Input"
+// @Param user body requests.UpdateUserRequest true "Update User Input"
 // @Success 200 {object} models.User
 // @Router /users [put]
 func (ctr *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -215,7 +216,7 @@ func (ctr *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	case "PUT":
 		body, _ := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
-		var userReq models.UserToUpdate
+		var userReq requests.UpdateUserRequest
 		err := json.Unmarshal(body, &userReq)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

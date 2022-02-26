@@ -12,8 +12,8 @@ import (
 func GenerateRoutes(services *services.Manager, cfg *config.Config, r *chi.Mux) {
 	ctr := controller.NewController(services, cfg)
 	mw := middleware.NewMiddleware(services)
-	r.Post("/login", ctr.Auth.Login)
-	r.Post("/registration", ctr.Auth.Registration)
+	r.With(mw.SetCors).Post("/login", ctr.Auth.Login)
+	r.With(mw.SetCors).Post("/registration", ctr.Auth.Registration)
 	r.Post("/refresh", ctr.Auth.Refresh)
 	r.With(mw.AuthCheck).Post("/logout", ctr.Auth.Logout)
 
@@ -24,4 +24,10 @@ func GenerateRoutes(services *services.Manager, cfg *config.Config, r *chi.Mux) 
 	r.Post("/users", ctr.User.CreateUser)
 	r.Put("/users", ctr.User.UpdateUser)
 	r.Delete("/users/{userId}", ctr.User.DeleteUser)
+
+	r.With(mw.SetCors).Get("/suppliers", ctr.Supplier.GetAllSuppliers)
+	r.Get("/suppliers/{supplierId}", ctr.Supplier.GetSupplier)
+	r.Get("/suppliers/{supplierId}/menu", ctr.Supplier.GetSupplierMenu)
+	r.Get("/suppliers/menu/{productId}", ctr.Supplier.GetSupplierMenuItem)
+	r.Post("/suppliers", ctr.Supplier.CreateSupplier)
 }

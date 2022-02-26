@@ -25,3 +25,16 @@ type TokenService interface {
 	DeleteTokenByID(id uuid.UUID) (uuid.UUID, error)
 	DeleteTokenByUserID(id uuid.UUID) (uuid.UUID, error)
 }
+
+type SupplierService interface {
+	GetSupplierByID(id uuid.UUID) (*models.SupplierWeb, error)
+	GetAllSuppliers() (*[]models.SupplierWeb, error)
+	CreateSupplier(supplierWeb *models.SupplierWeb) (uuid.UUID, error)
+	UpdateSupplier(supplierWeb *models.SupplierWeb) (uuid.UUID, error)
+	DeleteSupplier(id uuid.UUID) (uuid.UUID, error)
+}
+
+type ProductService interface {
+	GetMenuBySupplierID(id uuid.UUID) (*[]models.MenuItem, error)
+	GetMenuItemByID(id uuid.UUID) (*models.MenuItem, error)
+}

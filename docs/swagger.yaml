@@ -1,11 +1,36 @@
 basePath: /
 definitions:
-  models.ResponseToken:
+  models.MenuItem:
     properties:
-      access_token:
+      description:
         type: string
-      refresh_token:
+      id:
         type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      type:
+        type: string
+      weight:
+        type: number
+    type: object
+  models.SupplierWeb:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      menu:
+        items:
+          $ref: '#/definitions/models.MenuItem'
+        type: array
+      name:
+        type: string
+      working_time:
+        $ref: '#/definitions/models.WorkingSchedule'
     type: object
   models.User:
     properties:
@@ -22,23 +47,46 @@ definitions:
       updatedAt:
         type: string
     type: object
-  models.UserLoginRequest:
+  models.WorkingSchedule:
     properties:
-      email:
+      close_in:
         type: string
-      password:
+      open_in:
+        type: string
+      working_days:
         type: string
     type: object
-  models.UserRegistrationRequest:
+  requests.MenuItemRequest:
     properties:
-      email:
+      description:
+        type: string
+      image:
         type: string
       name:
         type: string
-      password:
+      price:
+        type: number
+      type:
         type: string
+      weight:
+        type: number
     type: object
-  models.UserToUpdate:
+  requests.SupplierWebRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      menu:
+        items:
+          $ref: '#/definitions/requests.MenuItemRequest'
+        type: array
+      name:
+        type: string
+      working_time:
+        $ref: '#/definitions/models.WorkingSchedule'
+    type: object
+  requests.UpdateUserRequest:
     properties:
       email:
         type: string
@@ -47,6 +95,29 @@ definitions:
       name:
         type: string
       password:
+        type: string
+    type: object
+  requests.UserLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  requests.UserRegistrationRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  responses.TokensResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
         type: string
     type: object
 host: localhost:8080
@@ -69,14 +140,14 @@ paths:
         name: authLogin
         required: true
         schema:
-          $ref: '#/definitions/models.UserLoginRequest'
+          $ref: '#/definitions/requests.UserLoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseToken'
+            $ref: '#/definitions/responses.TokensResponse'
       summary: Login
       tags:
       - auth
@@ -142,7 +213,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.UserToUpdate'
+          $ref: '#/definitions/requests.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -173,7 +244,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseToken'
+            $ref: '#/definitions/responses.TokensResponse'
       security:
       - ApiKeyAuth: []
       summary: Refresh
@@ -191,17 +262,125 @@ paths:
         name: authRegistration
         required: true
         schema:
-          $ref: '#/definitions/models.UserRegistrationRequest'
+          $ref: '#/definitions/requests.UserRegistrationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseToken'
+            $ref: '#/definitions/responses.TokensResponse'
       summary: Registration
       tags:
       - auth
+  /suppliers:
+    get:
+      consumes:
+      - application/json
+      description: Get Suppliers
+      operationId: get-suppliers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SupplierWeb'
+            type: array
+      summary: Get Suppliers
+      tags:
+      - suppliers
+    post:
+      consumes:
+      - application/json
+      description: Create Supplier
+      operationId: create-supplier
+      parameters:
+      - description: Create Supplier Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.SupplierWebRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SupplierWeb'
+      summary: Create Supplier
+      tags:
+      - suppliers
+  /suppliers/{supplierId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Supplier
+      operationId: get-supplier
+      parameters:
+      - description: Supplier ID
+        in: path
+        name: supplierId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SupplierWeb'
+      summary: Get Supplier
+      tags:
+      - suppliers
+  /suppliers/{supplierId}/menu:
+    get:
+      consumes:
+      - application/json
+      description: Get Supplier Menu
+      operationId: get-supplier-menu
+      parameters:
+      - description: Supplier ID
+        in: path
+        name: supplierId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MenuItem'
+            type: array
+      summary: Get Supplier Menu
+      tags:
+      - suppliers
+  /suppliers/menu/{productId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Supplier Menu Item
+      operationId: get-supplier-menu-item
+      parameters:
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MenuItem'
+      summary: Get Supplier Menu Item
+      tags:
+      - suppliers
   /users:
     get:
       consumes:
@@ -253,7 +432,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.UserToUpdate'
+          $ref: '#/definitions/requests.UpdateUserRequest'
       produces:
       - application/json
       responses:

@@ -6,8 +6,10 @@ import (
 )
 
 type Manager struct {
-	User  UserService
-	Token TokenService
+	User     UserService
+	Token    TokenService
+	Supplier SupplierService
+	Product  ProductService
 }
 
 func NewManager(store *store.Store) (*Manager, error) {
@@ -15,7 +17,9 @@ func NewManager(store *store.Store) (*Manager, error) {
 		return nil, errors.New("no store provided")
 	}
 	return &Manager{
-		User:  NewUsersWebService(store),
-		Token: NewTokensWebService(store),
+		User:     NewUsersWebService(store),
+		Token:    NewTokensWebService(store),
+		Supplier: NewSuppliersWebService(store),
+		Product:  NewProductsWebService(store),
 	}, nil
 }
