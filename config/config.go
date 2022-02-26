@@ -8,16 +8,17 @@ import (
 )
 
 type Config struct {
-	MysqlUserName        string
-	MysqlPassword        string
-	MysqlDBName          string
-	MysqlMaxIdleCons     int
-	MysqlMaxOpenCons     int
-	MysqlConsMaxLifeTime int
-	AccessTokenLifeTime  int
-	RefreshTokenLifeTime int
-	AccessSecret         string
-	RefreshSecret        string
+	MysqlUserName            string
+	MysqlPassword            string
+	MysqlDBName              string
+	MysqlMaxIdleCons         int
+	MysqlMaxOpenCons         int
+	MysqlConsMaxLifeTime     int
+	AccessTokenLifeTime      int
+	RefreshTokenLifeTime     int
+	AccessSecret             string
+	RefreshSecret            string
+	AccessControlAllowOrigin string
 }
 
 func NewConfig() *Config {
@@ -42,5 +43,11 @@ func NewConfig() *Config {
 	cfg.AccessSecret = os.Getenv("AccessSecret")
 	cfg.RefreshSecret = os.Getenv("RefreshSecret")
 
+	err = godotenv.Load("config/cors.env")
+	if err != nil {
+		log.Fatal("Cant load cors.env")
+	}
+
+	cfg.AccessControlAllowOrigin = os.Getenv("AccessControlAllowOrigin")
 	return cfg
 }

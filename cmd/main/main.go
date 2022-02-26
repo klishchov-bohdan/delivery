@@ -23,7 +23,6 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	//ws := models.NewWorkingSchedule(time.Date(0, 0, 0, 5, 20, 0, 0, time.Local), time.Date(0, 0, 0, 14, 20, 0, 0, time.Local), []time.Weekday{time.Monday, time.Friday})
 	db, err := db.Dial()
 	if err != nil {
 		log.Fatal(err)
@@ -31,11 +30,21 @@ func main() {
 	defer db.Close()
 
 	storage := store.NewStore(db)
+
 	service, err := services.NewManager(storage)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	//p := parser.NewSupplierParser(service.Supplier)
+	//err = p.ParseSuppliers()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//err = p.SaveToDB()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//return
 	cfg := config.NewConfig()
 
 	r := chi.NewRouter()

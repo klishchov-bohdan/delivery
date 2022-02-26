@@ -39,7 +39,7 @@ const docTemplate_swagger = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserLoginRequest"
+                            "$ref": "#/definitions/requests.UserLoginRequest"
                         }
                     }
                 ],
@@ -47,7 +47,7 @@ const docTemplate_swagger = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseToken"
+                            "$ref": "#/definitions/responses.TokensResponse"
                         }
                     }
                 }
@@ -157,7 +157,7 @@ const docTemplate_swagger = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserToUpdate"
+                            "$ref": "#/definitions/requests.UpdateUserRequest"
                         }
                     }
                 ],
@@ -203,7 +203,7 @@ const docTemplate_swagger = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseToken"
+                            "$ref": "#/definitions/responses.TokensResponse"
                         }
                     }
                 }
@@ -230,7 +230,7 @@ const docTemplate_swagger = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserRegistrationRequest"
+                            "$ref": "#/definitions/requests.UserRegistrationRequest"
                         }
                     }
                 ],
@@ -238,7 +238,169 @@ const docTemplate_swagger = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseToken"
+                            "$ref": "#/definitions/responses.TokensResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers": {
+            "get": {
+                "description": "Get Suppliers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suppliers"
+                ],
+                "summary": "Get Suppliers",
+                "operationId": "get-suppliers",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.SupplierWeb"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create Supplier",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suppliers"
+                ],
+                "summary": "Create Supplier",
+                "operationId": "create-supplier",
+                "parameters": [
+                    {
+                        "description": "Create Supplier Input",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.SupplierWebRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SupplierWeb"
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers/menu/{productId}": {
+            "get": {
+                "description": "Get Supplier Menu Item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suppliers"
+                ],
+                "summary": "Get Supplier Menu Item",
+                "operationId": "get-supplier-menu-item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MenuItem"
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers/{supplierId}": {
+            "get": {
+                "description": "Get Supplier",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suppliers"
+                ],
+                "summary": "Get Supplier",
+                "operationId": "get-supplier",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Supplier ID",
+                        "name": "supplierId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.SupplierWeb"
+                        }
+                    }
+                }
+            }
+        },
+        "/suppliers/{supplierId}/menu": {
+            "get": {
+                "description": "Get Supplier Menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suppliers"
+                ],
+                "summary": "Get Supplier Menu",
+                "operationId": "get-supplier-menu",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Supplier ID",
+                        "name": "supplierId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.MenuItem"
+                            }
                         }
                     }
                 }
@@ -290,7 +452,7 @@ const docTemplate_swagger = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserToUpdate"
+                            "$ref": "#/definitions/requests.UpdateUserRequest"
                         }
                     }
                 ],
@@ -403,14 +565,52 @@ const docTemplate_swagger = `{
         }
     },
     "definitions": {
-        "models.ResponseToken": {
+        "models.MenuItem": {
             "type": "object",
             "properties": {
-                "access_token": {
+                "description": {
                     "type": "string"
                 },
-                "refresh_token": {
+                "id": {
                     "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.SupplierWeb": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "menu": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuItem"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "working_time": {
+                    "$ref": "#/definitions/models.WorkingSchedule"
                 }
             }
         },
@@ -437,32 +637,67 @@ const docTemplate_swagger = `{
                 }
             }
         },
-        "models.UserLoginRequest": {
+        "models.WorkingSchedule": {
             "type": "object",
             "properties": {
-                "email": {
+                "close_in": {
                     "type": "string"
                 },
-                "password": {
+                "open_in": {
+                    "type": "string"
+                },
+                "working_days": {
                     "type": "string"
                 }
             }
         },
-        "models.UserRegistrationRequest": {
+        "requests.MenuItemRequest": {
             "type": "object",
             "properties": {
-                "email": {
+                "description": {
+                    "type": "string"
+                },
+                "image": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "password": {
+                "price": {
+                    "type": "number"
+                },
+                "type": {
                     "type": "string"
+                },
+                "weight": {
+                    "type": "number"
                 }
             }
         },
-        "models.UserToUpdate": {
+        "requests.SupplierWebRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "menu": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/requests.MenuItemRequest"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "working_time": {
+                    "$ref": "#/definitions/models.WorkingSchedule"
+                }
+            }
+        },
+        "requests.UpdateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -475,6 +710,42 @@ const docTemplate_swagger = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.UserLoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.UserRegistrationRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.TokensResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 }
             }

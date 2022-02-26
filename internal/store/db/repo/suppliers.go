@@ -82,6 +82,7 @@ func (r *SuppliersRepo) CreateSupplier(supplier *models.Supplier) (uuid.UUID, er
 		_, err = stmt.Exec(
 			uid,
 			supplier.Name,
+			supplier.Image,
 			supplier.Description,
 			supplier.WorkingTime.OpenIn,
 			supplier.WorkingTime.CloseIn,

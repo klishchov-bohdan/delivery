@@ -63,15 +63,7 @@ func (service *SuppliersWebService) CreateSupplier(supplierWeb *models.SupplierW
 		return uuid.Nil, err
 	}
 	for _, menuItem := range supplierWeb.Menu {
-		_, err = service.store.Products.CreateProduct(&models.Product{
-			ID:          menuItem.ID,
-			SupplierID:  supplierID,
-			Name:        menuItem.Name,
-			Image:       menuItem.Image,
-			Description: menuItem.Description,
-			Price:       menuItem.Price,
-			Weight:      menuItem.Weight,
-		})
+		_, err = service.store.Products.CreateProduct(menuItem.ToProduct(supplierID))
 		if err != nil {
 			_ = service.store.Products.RollbackTx()
 			return uuid.Nil, err
@@ -105,15 +97,7 @@ func (service *SuppliersWebService) UpdateSupplier(supplierWeb *models.SupplierW
 		return uuid.Nil, err
 	}
 	for _, menuItem := range supplierWeb.Menu {
-		_, err = service.store.Products.UpdateProduct(&models.Product{
-			ID:          menuItem.ID,
-			SupplierID:  supplierID,
-			Name:        menuItem.Name,
-			Image:       menuItem.Image,
-			Description: menuItem.Description,
-			Price:       menuItem.Price,
-			Weight:      menuItem.Weight,
-		})
+		_, err = service.store.Products.UpdateProduct(menuItem.ToProduct(supplierID))
 		if err != nil {
 			_ = service.store.Products.RollbackTx()
 			return uuid.Nil, err

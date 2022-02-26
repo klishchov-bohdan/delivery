@@ -11,7 +11,7 @@ type Supplier struct {
 	Name        string
 	Image       string
 	Description string
-	WorkingTime *WorkingSchedule
+	WorkingTime WorkingSchedule
 	CreatedAt   *time.Time
 	UpdatedAt   *time.Time
 }
@@ -36,12 +36,12 @@ func NewWorkingSchedule(openIn time.Time, closeIn time.Time, workingDays []time.
 }
 
 type SupplierWeb struct {
-	ID          uuid.UUID        `json:"id"`
-	Name        string           `json:"name"`
-	Image       string           `json:"image"`
-	Description string           `json:"description"`
-	WorkingTime *WorkingSchedule `json:"working_time"`
-	Menu        []*MenuItem      `json:"menu"`
+	ID          uuid.UUID       `json:"id"`
+	Name        string          `json:"name"`
+	Image       string          `json:"image"`
+	Description string          `json:"description"`
+	WorkingTime WorkingSchedule `json:"working_time"`
+	Menu        []*MenuItem     `json:"menu"`
 }
 
 func NewSupplierWeb(supplier *Supplier, menu *[]Product) *SupplierWeb {
@@ -56,4 +56,22 @@ func NewSupplierWeb(supplier *Supplier, menu *[]Product) *SupplierWeb {
 		supplierWeb.Menu = append(supplierWeb.Menu, product.ToMenuItem())
 	}
 	return supplierWeb
+}
+
+func (sw *SupplierWeb) ToSupplier() *Supplier {
+	return &Supplier{
+		ID:          sw.ID,
+		Name:        sw.Name,
+		Image:       sw.Image,
+		Description: sw.Description,
+		WorkingTime: sw.WorkingTime,
+	}
+}
+
+func (sw *SupplierWeb) GetProducts() *[]Product {
+	var products []Product
+	for _, menuItem := range sw.Menu {
+		products = append(products, *menuItem.ToProduct(sw.ID))
+	}
+	return &products
 }

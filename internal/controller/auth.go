@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/klishchov-bohdan/delivery/config"
 	"github.com/klishchov-bohdan/delivery/internal/models"
+	"github.com/klishchov-bohdan/delivery/internal/requests"
+	"github.com/klishchov-bohdan/delivery/internal/responses"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/token"
 	"golang.org/x/crypto/bcrypt"
@@ -30,13 +32,13 @@ func NewAuthController(services *services.Manager) *AuthController {
 // @ID user-login
 // @Accept  json
 // @Produce  json
-// @Param authLogin body models.UserLoginRequest true "Auth Login Input"
-// @Success 200 {object} models.ResponseToken
+// @Param authLogin body requests.UserLoginRequest true "Auth Login Input"
+// @Success 200 {object} responses.TokensResponse
 // @Router /login [post]
 func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		req := &models.UserLoginRequest{}
+		req := &requests.UserLoginRequest{}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -65,7 +67,7 @@ func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		resp := &models.ResponseToken{
+		resp := &responses.TokensResponse{
 			Access:  accessString,
 			Refresh: refreshString,
 		}
@@ -95,13 +97,13 @@ func (ctr AuthController) Login(w http.ResponseWriter, r *http.Request) {
 // @ID user-registration
 // @Accept  json
 // @Produce  json
-// @Param authRegistration body models.UserRegistrationRequest true "Auth Registration Input"
-// @Success 200 {object} models.ResponseToken
+// @Param authRegistration body requests.UserRegistrationRequest true "Auth Registration Input"
+// @Success 200 {object} responses.TokensResponse
 // @Router /registration [post]
 func (ctr *AuthController) Registration(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		req := &models.UserRegistrationRequest{}
+		req := &requests.UserRegistrationRequest{}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -121,7 +123,7 @@ func (ctr *AuthController) Registration(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		resp := &models.ResponseToken{
+		resp := &responses.TokensResponse{
 			Access:  accessString,
 			Refresh: refreshString,
 		}
@@ -189,7 +191,7 @@ func (ctr *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Authorization"
-// @Success 200 {object} models.ResponseToken
+// @Success 200 {object} responses.TokensResponse
 // @Security ApiKeyAuth
 // @Router /refresh [post]
 func (ctr *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
@@ -227,7 +229,7 @@ func (ctr *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		resp := &models.ResponseToken{
+		resp := &responses.TokensResponse{
 			Access:  newAccessString,
 			Refresh: newRefreshString,
 		}

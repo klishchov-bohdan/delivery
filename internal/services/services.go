@@ -33,3 +33,8 @@ type SupplierService interface {
 	UpdateSupplier(supplierWeb *models.SupplierWeb) (uuid.UUID, error)
 	DeleteSupplier(id uuid.UUID) (uuid.UUID, error)
 }
+
+type ProductService interface {
+	GetMenuBySupplierID(id uuid.UUID) (*[]models.MenuItem, error)
+	GetMenuItemByID(id uuid.UUID) (*models.MenuItem, error)
+}
