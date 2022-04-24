@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/klishchov-bohdan/delivery/config"
 	_ "github.com/klishchov-bohdan/delivery/docs"
+	mware "github.com/klishchov-bohdan/delivery/internal/middleware"
 	"github.com/klishchov-bohdan/delivery/internal/routes"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/store"
@@ -30,11 +31,11 @@ func main() {
 	defer db.Close()
 
 	storage := store.NewStore(db)
-
 	service, err := services.NewManager(storage)
 	if err != nil {
 		log.Fatal(err)
 	}
+	mw := mware.NewMiddleware(service)
 	//p := parser.NewSupplierParser(service.Supplier)
 	//err = p.ParseSuppliers()
 	//if err != nil {
@@ -52,6 +53,7 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(mw.SetCors)
 
 	routes.GenerateRoutes(service, cfg, r)
 	r.Get("/swagger/*", httpSwagger.Handler(

@@ -8,17 +8,20 @@ import (
 )
 
 type Config struct {
-	MysqlUserName            string
-	MysqlPassword            string
-	MysqlDBName              string
-	MysqlMaxIdleCons         int
-	MysqlMaxOpenCons         int
-	MysqlConsMaxLifeTime     int
-	AccessTokenLifeTime      int
-	RefreshTokenLifeTime     int
-	AccessSecret             string
-	RefreshSecret            string
-	AccessControlAllowOrigin string
+	MysqlUserName              string
+	MysqlPassword              string
+	MysqlDBName                string
+	MysqlMaxIdleCons           int
+	MysqlMaxOpenCons           int
+	MysqlConsMaxLifeTime       int
+	AccessTokenLifeTime        int
+	RefreshTokenLifeTime       int
+	AccessSecret               string
+	RefreshSecret              string
+	AccessControlAllowOrigin   string
+	AccessControlAllowHeaders  string
+	AccessControlExposeHeaders string
+	AccessControlAllowMethods  string
 }
 
 func NewConfig() *Config {
@@ -49,5 +52,8 @@ func NewConfig() *Config {
 	}
 
 	cfg.AccessControlAllowOrigin = os.Getenv("AccessControlAllowOrigin")
+	cfg.AccessControlAllowHeaders = os.Getenv("AccessControlAllowHeaders")
+	cfg.AccessControlExposeHeaders = os.Getenv("AccessControlExposeHeaders")
+	cfg.AccessControlAllowMethods = os.Getenv("AccessControlAllowMethods")
 	return cfg
 }

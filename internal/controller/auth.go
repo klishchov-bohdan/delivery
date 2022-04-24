@@ -248,5 +248,4 @@ func (ctr *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Only GET method", http.StatusMethodNotAllowed)
 	}
-
 }

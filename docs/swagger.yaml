@@ -21,6 +21,8 @@ definitions:
     properties:
       description:
         type: string
+      id:
+        type: string
       image:
         type: string
       menu:
@@ -486,4 +488,26 @@ paths:
       summary: Get User
       tags:
       - users
+  /validate:
+    get:
+      consumes:
+      - application/json
+      description: Validate
+      operationId: user-validate
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - ApiKeyAuth: []
+      summary: Validate
+      tags:
+      - auth
 swagger: "2.0"

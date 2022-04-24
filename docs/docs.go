@@ -562,6 +562,41 @@ const docTemplate_swagger = `{
                     }
                 }
             }
+        },
+        "/validate": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Validate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Validate",
+                "operationId": "user-validate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -595,6 +630,9 @@ const docTemplate_swagger = `{
             "type": "object",
             "properties": {
                 "description": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "image": {

@@ -9,7 +9,9 @@ type ShippingAddress struct {
 	ID        uuid.UUID
 	ZIPCode   string
 	Country   string
-	Region    string
+	County    string
+	State     string
+	City      string
 	Street    string
 	CreatedAt *time.Time
 	UpdatedAt *time.Time

@@ -18,13 +18,13 @@ func NewShippingAddressesRepo(db *sql.DB) *ShippingAddressesRepo {
 
 func (r *ShippingAddressesRepo) GetAllShippingAddresses() (*[]models.ShippingAddress, error) {
 	var addresses []models.ShippingAddress
-	rows, err := r.DB.Query("SELECT id, zip_code, country, region, street, created_at, updated_at FROM shipping_addresses")
+	rows, err := r.DB.Query("SELECT id, zip_code, country, state, city, street, county, created_at, updated_at FROM shipping_addresses")
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var address models.ShippingAddress
-		err = rows.Scan(&address.ID, &address.ZIPCode, &address.Country, &address.Region, &address.Street, &address.CreatedAt, &address.UpdatedAt)
+		err = rows.Scan(&address.ID, &address.ZIPCode, &address.Country, &address.State, &address.City, &address.Street, &address.County, &address.CreatedAt, &address.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -40,8 +40,8 @@ func (r *ShippingAddressesRepo) GetShippingAddressByID(id uuid.UUID) (*models.Sh
 		return nil, err
 	}
 	err = r.DB.QueryRow(
-		"SELECT id, zip_code, country, region, street, created_at, updated_at FROM shipping_addresses WHERE id = ?", uid).
-		Scan(&address.ID, &address.ZIPCode, &address.Country, &address.Region, &address.Street, &address.CreatedAt, &address.UpdatedAt)
+		"SELECT id, zip_code, country, state, city, street, county, created_at, updated_at FROM shipping_addresses WHERE id = ?", uid).
+		Scan(&address.ID, &address.ZIPCode, &address.Country, &address.State, &address.City, &address.Street, &address.County, &address.CreatedAt, &address.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -57,21 +57,21 @@ func (r *ShippingAddressesRepo) CreateShippingAddress(address *models.ShippingAd
 		return uuid.Nil, err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("INSERT INTO shipping_addresses(id, zip_code, country, region, street) VALUES(?, ?, ?, ?, ?)")
+		stmt, err := r.TX.Prepare("INSERT INTO shipping_addresses(id, zip_code, country, state, city, street, county) VALUES(?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(uid, address.ZIPCode, address.Country, address.Region, address.Street)
+		_, err = stmt.Exec(uid, address.ZIPCode, address.Country, address.State, address.City, address.Street, address.County)
 		if err != nil {
 			return uuid.Nil, err
 		}
 		return address.ID, nil
 	}
-	stmt, err := r.DB.Prepare("INSERT INTO shipping_addresses(id, zip_code, country, region, street) VALUES(?, ?, ?, ?, ?)")
+	stmt, err := r.DB.Prepare("INSERT INTO shipping_addresses(id, zip_code, country, state, city, street, county) VALUES(?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(uid, address.ZIPCode, address.Country, address.Region, address.Street)
+	_, err = stmt.Exec(uid, address.ZIPCode, address.Country, address.State, address.City, address.Street, address.County)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -87,21 +87,21 @@ func (r *ShippingAddressesRepo) UpdateShippingAddress(address *models.ShippingAd
 		return uuid.Nil, err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("UPDATE shipping_addresses SET zip_code = ?, country = ?, region = ?, street = ? WHERE id = ?")
+		stmt, err := r.TX.Prepare("UPDATE shipping_addresses SET zip_code = ?, country = ?, state = ?, city = ?, street = ?, county = ? WHERE id = ?")
 		if err != nil {
 			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(address.ZIPCode, address.Country, address.Region, address.Street, uid)
+		_, err = stmt.Exec(address.ZIPCode, address.Country, address.State, address.City, address.Street, address.County, uid)
 		if err != nil {
 			return uuid.Nil, err
 		}
 		return address.ID, nil
 	}
-	stmt, err := r.DB.Prepare("UPDATE shipping_addresses SET zip_code = ?, country = ?, region = ?, street = ? WHERE id = ?")
+	stmt, err := r.DB.Prepare("UPDATE shipping_addresses SET zip_code = ?, country = ?, state = ?, city = ?, street = ?, county = ? WHERE id = ?")
 	if err != nil {
 		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(address.ZIPCode, address.Country, address.Region, address.Street, uid)
+	_, err = stmt.Exec(address.ZIPCode, address.Country, address.State, address.City, address.Street, address.County, uid)
 	if err != nil {
 		return uuid.Nil, err
 	}

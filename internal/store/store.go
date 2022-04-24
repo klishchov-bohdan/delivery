@@ -16,7 +16,7 @@ type Store struct {
 func NewStore(db *sql.DB) *Store {
 	ur := repo.NewUsersRepo(db)
 	sr := repo.NewSuppliersRepo(db)
-	pr := repo.NewProductMySQL(db)
+	pr := repo.NewProductRepo(db)
 	ar := repo.NewShippingAddressesRepo(db)
 	tr := repo.NewTokensRepo(db)
 

@@ -12,7 +12,7 @@ type ProductRepo struct {
 	TX *sql.Tx
 }
 
-func NewProductMySQL(db *sql.DB) *ProductRepo {
+func NewProductRepo(db *sql.DB) *ProductRepo {
 	return &ProductRepo{DB: db}
 }
 
