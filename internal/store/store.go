@@ -11,6 +11,7 @@ type Store struct {
 	Products  *repo.ProductRepo
 	Addresses *repo.ShippingAddressesRepo
 	Tokens    *repo.TokensRepo
+	Orders    *repo.OrderRepo
 }
 
 func NewStore(db *sql.DB) *Store {
@@ -19,6 +20,7 @@ func NewStore(db *sql.DB) *Store {
 	pr := repo.NewProductRepo(db)
 	ar := repo.NewShippingAddressesRepo(db)
 	tr := repo.NewTokensRepo(db)
+	or := repo.NewOrderRepo(db)
 
 	return &Store{
 		Users:     ur,
@@ -26,5 +28,6 @@ func NewStore(db *sql.DB) *Store {
 		Products:  pr,
 		Addresses: ar,
 		Tokens:    tr,
+		Orders:    or,
 	}
 }
