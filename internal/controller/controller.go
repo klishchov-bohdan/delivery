@@ -9,6 +9,7 @@ type Controller struct {
 	Auth     *AuthController
 	User     *UserController
 	Supplier *SupplierController
+	Order    *OrderController
 }
 
 func NewController(services *services.Manager, cfg *config.Config) *Controller {
@@ -16,5 +17,6 @@ func NewController(services *services.Manager, cfg *config.Config) *Controller {
 		Auth:     NewAuthController(services),
 		User:     NewUserController(services, cfg),
 		Supplier: NewSupplierController(services, cfg),
+		Order:    NewOrderController(services, cfg),
 	}
 }

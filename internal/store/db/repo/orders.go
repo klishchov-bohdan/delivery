@@ -31,6 +31,27 @@ func (r *OrderRepo) GetOrderByID(id uuid.UUID) (*models.Order, error) {
 	return &order, nil
 }
 
+func (r *OrderRepo) GetOrdersByUserID(userID uuid.UUID) (*[]models.Order, error) {
+	var orders []models.Order
+	uid, err := userID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.DB.Query("SELECT id, user_id, total_price, client_phone, shipping_address_id, created_at, updated_at FROM orders WHERE user_id = ?", uid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var order models.Order
+		err = rows.Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.ClientPhone, &order.ShippingAddressID, &order.CreatedAt, &order.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+	return &orders, nil
+}
+
 func (r *OrderRepo) CreateOrder(order *models.Order) (uuid.UUID, error) {
 	if order == nil {
 		return uuid.Nil, errors.New("no order provided")
