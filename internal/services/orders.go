@@ -53,14 +53,14 @@ func (service *OrdersWebService) CreateOrder(order *models.Order, address *model
 		return uuid.Nil, err
 	}
 	service.store.Addresses.SetTx(service.store.Orders.GetTx())
-	orderID, err := service.store.Orders.CreateOrder(order)
-	if err != nil {
-		_ = service.store.Orders.RollbackTx()
-		return uuid.Nil, err
-	}
 	_, err = service.store.Addresses.CreateShippingAddress(address)
 	if err != nil {
 		_ = service.store.Addresses.RollbackTx()
+		return uuid.Nil, err
+	}
+	orderID, err := service.store.Orders.CreateOrder(order)
+	if err != nil {
+		_ = service.store.Orders.RollbackTx()
 		return uuid.Nil, err
 	}
 	err = service.store.Orders.CommitTx()

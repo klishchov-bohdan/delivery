@@ -31,7 +31,7 @@ func GenerateRoutes(services *services.Manager, cfg *config.Config, r *chi.Mux) 
 	r.Get("/suppliers/menu/{productId}", ctr.Supplier.GetSupplierMenuItem)
 	r.Post("/suppliers", ctr.Supplier.CreateSupplier)
 
-	r.Get("orders", ctr.Order.GetOrder)
-	r.Get("orders/byUser/{userId}", ctr.Order.GetOrdersByUserID)
-	r.Post("orders", ctr.Order.CreateOrder)
+	r.Get("/orders/{orderId}", ctr.Order.GetOrder)
+	r.Get("/orders/byUser/{userId}", ctr.Order.GetOrdersByUserID)
+	r.Post("/orders", ctr.Order.CreateOrder)
 }

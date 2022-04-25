@@ -26,7 +26,7 @@ func NewOrderController(services *services.Manager, cfg *config.Config) *OrderCo
 // GetOrder godoc
 // @Summary Get Order
 // @Description Get Order
-// @Tags order
+// @Tags orders
 // @ID get-order
 // @Accept  json
 // @Produce  json
@@ -106,10 +106,7 @@ func (ctr *OrderController) CreateOrder(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		createdOrderID, err := ctr.services.Order.CreateOrder(
-			orderReq.GetOrder(),
-			orderReq.ShippingAddress)
-
+		createdOrderID, err := ctr.services.Order.CreateOrder(orderReq.ToOrder())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

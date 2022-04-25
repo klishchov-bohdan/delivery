@@ -17,6 +17,27 @@ definitions:
       weight:
         type: number
     type: object
+  models.ShippingAddress:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      county:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      updatedAt:
+        type: string
+      zipcode:
+        type: string
+    type: object
   models.SupplierWeb:
     properties:
       description:
@@ -58,6 +79,21 @@ definitions:
       working_days:
         type: string
     type: object
+  requests.AddressRequest:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      county:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      zipcode:
+        type: string
+    type: object
   requests.MenuItemRequest:
     properties:
       description:
@@ -72,6 +108,17 @@ definitions:
         type: string
       weight:
         type: number
+    type: object
+  requests.OrderRequest:
+    properties:
+      clientPhone:
+        type: string
+      shippingAddress:
+        $ref: '#/definitions/requests.AddressRequest'
+      totalPrice:
+        type: integer
+      userID:
+        type: string
     type: object
   requests.SupplierWebRequest:
     properties:
@@ -114,6 +161,19 @@ definitions:
         type: string
       password:
         type: string
+    type: object
+  responses.OrderResponse:
+    properties:
+      clientPhone:
+        type: string
+      id:
+        type: string
+      shippingAddress:
+        $ref: '#/definitions/models.ShippingAddress'
+      totalPrice:
+        type: integer
+      user:
+        $ref: '#/definitions/models.User'
     type: object
   responses.TokensResponse:
     properties:
@@ -175,6 +235,75 @@ paths:
       summary: Logout
       tags:
       - auth
+  /orders:
+    post:
+      consumes:
+      - application/json
+      description: Create Order
+      operationId: create-order
+      parameters:
+      - description: Create Order Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.OrderResponse'
+      summary: Create Order
+      tags:
+      - orders
+  /orders/{orderId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Order
+      operationId: get-order
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.OrderResponse'
+      summary: Get Order
+      tags:
+      - orders
+  /orders/byUser/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Orders By User ID
+      operationId: get-orders-by-user-id
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.OrderResponse'
+            type: array
+      summary: Get Orders By User ID
+      tags:
+      - orders
   /profile:
     get:
       consumes:
@@ -488,26 +617,4 @@ paths:
       summary: Get User
       tags:
       - users
-  /validate:
-    get:
-      consumes:
-      - application/json
-      description: Validate
-      operationId: user-validate
-      parameters:
-      - description: Authorization
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ""
-      security:
-      - ApiKeyAuth: []
-      summary: Validate
-      tags:
-      - auth
 swagger: "2.0"

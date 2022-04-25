@@ -6,12 +6,13 @@ import (
 )
 
 type Store struct {
-	Users     *repo.UsersRepo
-	Suppliers *repo.SuppliersRepo
-	Products  *repo.ProductRepo
-	Addresses *repo.ShippingAddressesRepo
-	Tokens    *repo.TokensRepo
-	Orders    *repo.OrderRepo
+	Users         *repo.UsersRepo
+	Suppliers     *repo.SuppliersRepo
+	Products      *repo.ProductRepo
+	Addresses     *repo.ShippingAddressesRepo
+	Tokens        *repo.TokensRepo
+	Orders        *repo.OrderRepo
+	OrderProducts *repo.OrderProductsRepo
 }
 
 func NewStore(db *sql.DB) *Store {
@@ -21,13 +22,15 @@ func NewStore(db *sql.DB) *Store {
 	ar := repo.NewShippingAddressesRepo(db)
 	tr := repo.NewTokensRepo(db)
 	or := repo.NewOrderRepo(db)
+	opr := repo.NewOrderProductsRepo(db)
 
 	return &Store{
-		Users:     ur,
-		Suppliers: sr,
-		Products:  pr,
-		Addresses: ar,
-		Tokens:    tr,
-		Orders:    or,
+		Users:         ur,
+		Suppliers:     sr,
+		Products:      pr,
+		Addresses:     ar,
+		Tokens:        tr,
+		Orders:        or,
+		OrderProducts: opr,
 	}
 }
