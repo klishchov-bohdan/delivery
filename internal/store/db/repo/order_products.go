@@ -16,7 +16,7 @@ func NewOrderProductsRepo(db *sql.DB) *OrderProductsRepo {
 	return &OrderProductsRepo{DB: db}
 }
 
-func (r *OrderRepo) GetProductsByOrderID(orderID uuid.UUID) (*[]models.OrderProducts, error) {
+func (r *OrderProductsRepo) GetProductsByOrderID(orderID uuid.UUID) (*[]models.OrderProducts, error) {
 	var orderedProducts []models.OrderProducts
 	uid, err := orderID.MarshalBinary()
 	if err != nil {

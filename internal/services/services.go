@@ -43,7 +43,7 @@ type ProductService interface {
 type OrderService interface {
 	GetOrderByID(id uuid.UUID) (*responses.OrderResponse, error)
 	GetOrdersByUserID(userID uuid.UUID) (*[]responses.OrderResponse, error)
-	CreateOrder(order *models.Order, address *models.ShippingAddress) (uuid.UUID, error)
+	CreateOrder(order *models.Order, address *models.ShippingAddress, orderedProducts *[]models.OrderProducts) (uuid.UUID, error)
 	UpdateOrder(order *models.Order, address *models.ShippingAddress) (uuid.UUID, error)
 	DeleteOrder(id uuid.UUID) (uuid.UUID, error)
 }

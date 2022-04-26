@@ -27,7 +27,25 @@ func (service *OrdersWebService) GetOrderByID(id uuid.UUID) (*responses.OrderRes
 		return nil, err
 	}
 	user, _ := service.store.Users.GetUserByID(order.UserID)
-	return responses.NewOrderResponse(order, user, address), nil
+	orderProducts, err := service.store.OrderProducts.GetProductsByOrderID(order.ID)
+	if err != nil {
+		return nil, err
+	}
+	var orderedProducts []responses.OrderProductsResponse
+	for _, orderProduct := range *orderProducts {
+		product, err := service.store.Products.GetProductByID(orderProduct.ProductID)
+		if err != nil {
+			return nil, err
+		}
+		orderedProduct := &responses.OrderProductsResponse{
+			ID:              orderProduct.ID,
+			Product:         product,
+			ProductQuantity: orderProduct.ProductQuantity,
+			TotalPrice:      orderProduct.TotalPrice,
+		}
+		orderedProducts = append(orderedProducts, *orderedProduct)
+	}
+	return responses.NewOrderResponse(order, user, address, &orderedProducts), nil
 }
 
 func (service *OrdersWebService) GetOrdersByUserID(userID uuid.UUID) (*[]responses.OrderResponse, error) {
@@ -42,12 +60,30 @@ func (service *OrdersWebService) GetOrdersByUserID(userID uuid.UUID) (*[]respons
 			return nil, err
 		}
 		user, _ := service.store.Users.GetUserByID(order.UserID)
-		ordersResponse = append(ordersResponse, *responses.NewOrderResponse(&order, user, address))
+		orderProducts, err := service.store.OrderProducts.GetProductsByOrderID(order.ID)
+		if err != nil {
+			return nil, err
+		}
+		var orderedProducts []responses.OrderProductsResponse
+		for _, orderProduct := range *orderProducts {
+			product, err := service.store.Products.GetProductByID(orderProduct.ProductID)
+			if err != nil {
+				return nil, err
+			}
+			orderedProduct := &responses.OrderProductsResponse{
+				ID:              orderProduct.ID,
+				Product:         product,
+				ProductQuantity: orderProduct.ProductQuantity,
+				TotalPrice:      orderProduct.TotalPrice,
+			}
+			orderedProducts = append(orderedProducts, *orderedProduct)
+		}
+		ordersResponse = append(ordersResponse, *responses.NewOrderResponse(&order, user, address, &orderedProducts))
 	}
 	return &ordersResponse, nil
 }
 
-func (service *OrdersWebService) CreateOrder(order *models.Order, address *models.ShippingAddress) (uuid.UUID, error) {
+func (service *OrdersWebService) CreateOrder(order *models.Order, address *models.ShippingAddress, orderedProducts *[]models.OrderProducts) (uuid.UUID, error) {
 	err := service.store.Orders.BeginTx()
 	if err != nil {
 		return uuid.Nil, err
@@ -62,6 +98,13 @@ func (service *OrdersWebService) CreateOrder(order *models.Order, address *model
 	if err != nil {
 		_ = service.store.Orders.RollbackTx()
 		return uuid.Nil, err
+	}
+	for _, orderedProduct := range *orderedProducts {
+		_, err := service.store.OrderProducts.CreateOrderProducts(&orderedProduct)
+		if err != nil {
+			_ = service.store.Orders.RollbackTx()
+			return uuid.Nil, err
+		}
 	}
 	err = service.store.Orders.CommitTx()
 	if err != nil {

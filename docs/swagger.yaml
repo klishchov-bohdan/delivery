@@ -17,6 +17,29 @@ definitions:
       weight:
         type: number
     type: object
+  models.Product:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      supplierID:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+      weight:
+        type: number
+    type: object
   models.ShippingAddress:
     properties:
       city:
@@ -109,10 +132,23 @@ definitions:
       weight:
         type: number
     type: object
+  requests.OrderProductsRequest:
+    properties:
+      productID:
+        type: string
+      productQuantity:
+        type: integer
+      totalPrice:
+        type: integer
+    type: object
   requests.OrderRequest:
     properties:
       clientPhone:
         type: string
+      products:
+        items:
+          $ref: '#/definitions/requests.OrderProductsRequest'
+        type: array
       shippingAddress:
         $ref: '#/definitions/requests.AddressRequest'
       totalPrice:
@@ -162,12 +198,27 @@ definitions:
       password:
         type: string
     type: object
+  responses.OrderProductsResponse:
+    properties:
+      id:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      productQuantity:
+        type: integer
+      totalPrice:
+        type: integer
+    type: object
   responses.OrderResponse:
     properties:
       clientPhone:
         type: string
       id:
         type: string
+      orderedProducts:
+        items:
+          $ref: '#/definitions/responses.OrderProductsResponse'
+        type: array
       shippingAddress:
         $ref: '#/definitions/models.ShippingAddress'
       totalPrice:

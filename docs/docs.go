@@ -695,6 +695,41 @@ const docTemplate_swagger = `{
                 }
             }
         },
+        "models.Product": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "supplierID": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
         "models.ShippingAddress": {
             "type": "object",
             "properties": {
@@ -836,11 +871,31 @@ const docTemplate_swagger = `{
                 }
             }
         },
+        "requests.OrderProductsRequest": {
+            "type": "object",
+            "properties": {
+                "productID": {
+                    "type": "string"
+                },
+                "productQuantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                }
+            }
+        },
         "requests.OrderRequest": {
             "type": "object",
             "properties": {
                 "clientPhone": {
                     "type": "string"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/requests.OrderProductsRequest"
+                    }
                 },
                 "shippingAddress": {
                     "$ref": "#/definitions/requests.AddressRequest"
@@ -918,6 +973,23 @@ const docTemplate_swagger = `{
                 }
             }
         },
+        "responses.OrderProductsResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "productQuantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                }
+            }
+        },
         "responses.OrderResponse": {
             "type": "object",
             "properties": {
@@ -926,6 +998,12 @@ const docTemplate_swagger = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "orderedProducts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/responses.OrderProductsResponse"
+                    }
                 },
                 "shippingAddress": {
                     "$ref": "#/definitions/models.ShippingAddress"
