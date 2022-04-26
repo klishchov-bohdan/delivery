@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/google/uuid"
 	"github.com/klishchov-bohdan/delivery/internal/models"
+	"github.com/klishchov-bohdan/delivery/internal/responses"
 )
 
 //go:generate mockgen --destination=mocks/users.go --package=mocks github.com/klishchov-bohdan/delivery/internal/services UserService
@@ -37,4 +38,12 @@ type SupplierService interface {
 type ProductService interface {
 	GetMenuBySupplierID(id uuid.UUID) (*[]models.MenuItem, error)
 	GetMenuItemByID(id uuid.UUID) (*models.MenuItem, error)
+}
+
+type OrderService interface {
+	GetOrderByID(id uuid.UUID) (*responses.OrderResponse, error)
+	GetOrdersByUserID(userID uuid.UUID) (*[]responses.OrderResponse, error)
+	CreateOrder(order *models.Order, address *models.ShippingAddress, orderedProducts *[]models.OrderProducts) (uuid.UUID, error)
+	UpdateOrder(order *models.Order, address *models.ShippingAddress) (uuid.UUID, error)
+	DeleteOrder(id uuid.UUID) (uuid.UUID, error)
 }

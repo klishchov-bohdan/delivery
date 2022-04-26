@@ -88,6 +88,110 @@ const docTemplate_swagger = `{
                 }
             }
         },
+        "/orders": {
+            "post": {
+                "description": "Create Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Create Order",
+                "operationId": "create-order",
+                "parameters": [
+                    {
+                        "description": "Create Order Input",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.OrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.OrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/byUser/{userId}": {
+            "get": {
+                "description": "Get Orders By User ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get Orders By User ID",
+                "operationId": "get-orders-by-user-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.OrderResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{orderId}": {
+            "get": {
+                "description": "Get Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get Order",
+                "operationId": "get-order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.OrderResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/profile": {
             "get": {
                 "security": [
@@ -562,41 +666,6 @@ const docTemplate_swagger = `{
                     }
                 }
             }
-        },
-        "/validate": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Validate",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Validate",
-                "operationId": "user-validate",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -623,6 +692,73 @@ const docTemplate_swagger = `{
                 },
                 "weight": {
                     "type": "number"
+                }
+            }
+        },
+        "models.Product": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "supplierID": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.ShippingAddress": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "county": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "zipcode": {
+                    "type": "string"
                 }
             }
         },
@@ -689,6 +825,29 @@ const docTemplate_swagger = `{
                 }
             }
         },
+        "requests.AddressRequest": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "county": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "zipcode": {
+                    "type": "string"
+                }
+            }
+        },
         "requests.MenuItemRequest": {
             "type": "object",
             "properties": {
@@ -709,6 +868,43 @@ const docTemplate_swagger = `{
                 },
                 "weight": {
                     "type": "number"
+                }
+            }
+        },
+        "requests.OrderProductsRequest": {
+            "type": "object",
+            "properties": {
+                "productID": {
+                    "type": "string"
+                },
+                "productQuantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.OrderRequest": {
+            "type": "object",
+            "properties": {
+                "clientPhone": {
+                    "type": "string"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/requests.OrderProductsRequest"
+                    }
+                },
+                "shippingAddress": {
+                    "$ref": "#/definitions/requests.AddressRequest"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "string"
                 }
             }
         },
@@ -774,6 +970,49 @@ const docTemplate_swagger = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "responses.OrderProductsResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "productQuantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                }
+            }
+        },
+        "responses.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "clientPhone": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "orderedProducts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/responses.OrderProductsResponse"
+                    }
+                },
+                "shippingAddress": {
+                    "$ref": "#/definitions/models.ShippingAddress"
+                },
+                "totalPrice": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
                 }
             }
         },
