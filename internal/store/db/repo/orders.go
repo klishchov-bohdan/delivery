@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/klishchov-bohdan/delivery/internal/models"
 )
@@ -33,6 +34,7 @@ func (r *OrderRepo) GetOrderByID(id uuid.UUID) (*models.Order, error) {
 
 func (r *OrderRepo) GetOrdersByUserID(userID uuid.UUID) (*[]models.Order, error) {
 	var orders []models.Order
+	fmt.Println(userID)
 	uid, err := userID.MarshalBinary()
 	if err != nil {
 		return nil, err
@@ -47,6 +49,7 @@ func (r *OrderRepo) GetOrdersByUserID(userID uuid.UUID) (*[]models.Order, error)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println(order)
 		orders = append(orders, order)
 	}
 	return &orders, nil

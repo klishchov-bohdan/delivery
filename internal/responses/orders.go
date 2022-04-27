@@ -3,6 +3,7 @@ package responses
 import (
 	"github.com/google/uuid"
 	"github.com/klishchov-bohdan/delivery/internal/models"
+	"time"
 )
 
 type OrderResponse struct {
@@ -12,6 +13,7 @@ type OrderResponse struct {
 	TotalPrice      uint64
 	ClientPhone     string
 	ShippingAddress *models.ShippingAddress
+	CreatedAt       *time.Time
 }
 
 func NewOrderResponse(order *models.Order, user *models.User, address *models.ShippingAddress, products *[]OrderProductsResponse) *OrderResponse {
@@ -22,5 +24,6 @@ func NewOrderResponse(order *models.Order, user *models.User, address *models.Sh
 		TotalPrice:      order.TotalPrice,
 		ClientPhone:     order.ClientPhone,
 		ShippingAddress: address,
+		CreatedAt:       order.CreatedAt,
 	}
 }
