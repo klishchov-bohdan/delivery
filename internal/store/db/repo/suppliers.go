@@ -18,13 +18,22 @@ func NewSuppliersRepo(db *sql.DB) *SuppliersRepo {
 
 func (r *SuppliersRepo) GetAllSuppliers() (*[]models.Supplier, error) {
 	var suppliers []models.Supplier
-	rows, err := r.DB.Query("SELECT id, name, description, created_at, updated_at FROM suppliers")
+	rows, err := r.DB.Query("SELECT id, name, image, description, open_in, close_in, working_days, created_at, updated_at FROM suppliers")
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var supplier models.Supplier
-		err = rows.Scan(&supplier.ID, &supplier.Name, &supplier.Description, &supplier.CreatedAt, &supplier.UpdatedAt)
+		err = rows.Scan(
+			&supplier.ID,
+			&supplier.Name,
+			&supplier.Image,
+			&supplier.Description,
+			&supplier.WorkingTime.OpenIn,
+			&supplier.WorkingTime.CloseIn,
+			&supplier.WorkingTime.WorkingDays,
+			&supplier.CreatedAt,
+			&supplier.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -40,91 +49,128 @@ func (r *SuppliersRepo) GetSupplierByID(id uuid.UUID) (*models.Supplier, error) 
 		return nil, err
 	}
 	err = r.DB.QueryRow(
-		"SELECT id, name, description, created_at, updated_at FROM suppliers WHERE id = ?", uid).
-		Scan(&supplier.ID, &supplier.Name, &supplier.Description, &supplier.CreatedAt, &supplier.UpdatedAt)
+		"SELECT id, name, image, description, open_in, close_in, working_days, created_at, updated_at FROM suppliers WHERE id = ?", uid).
+		Scan(
+			&supplier.ID,
+			&supplier.Name,
+			&supplier.Image,
+			&supplier.Description,
+			&supplier.WorkingTime.OpenIn,
+			&supplier.WorkingTime.CloseIn,
+			&supplier.WorkingTime.WorkingDays,
+			&supplier.CreatedAt,
+			&supplier.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 	return &supplier, nil
 }
 
-func (r *SuppliersRepo) CreateSupplier(supplier *models.Supplier) (err error) {
+func (r *SuppliersRepo) CreateSupplier(supplier *models.Supplier) (uuid.UUID, error) {
 	if supplier == nil {
-		return errors.New("no supplier provided")
+		return uuid.Nil, errors.New("no supplier provided")
 	}
 	uid, err := supplier.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("INSERT INTO suppliers(id, name, description) VALUES(?, ?, ?)")
+		stmt, err := r.TX.Prepare("INSERT INTO suppliers(id, name, image, description, open_in, close_in, working_days) VALUES(?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(uid, supplier.Name, supplier.Description)
+		_, err = stmt.Exec(
+			uid,
+			supplier.Name,
+			supplier.Image,
+			supplier.Description,
+			supplier.WorkingTime.OpenIn,
+			supplier.WorkingTime.CloseIn,
+			supplier.WorkingTime.WorkingDays)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return supplier.ID, nil
 	}
-	stmt, err := r.DB.Prepare("INSERT INTO suppliers(id, name, description) VALUES(?, ?, ?)")
+	stmt, err := r.DB.Prepare("INSERT INTO suppliers(id, name, image, description, open_in, close_in, working_days) VALUES(?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(uid, supplier.Name, supplier.Description)
+	_, err = stmt.Exec(
+		uid,
+		supplier.Name,
+		supplier.Image,
+		supplier.Description,
+		supplier.WorkingTime.OpenIn,
+		supplier.WorkingTime.CloseIn,
+		supplier.WorkingTime.WorkingDays)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return supplier.ID, nil
 }
 
-func (r *SuppliersRepo) UpdateSupplier(supplier *models.Supplier) (err error) {
+func (r *SuppliersRepo) UpdateSupplier(supplier *models.Supplier) (uuid.UUID, error) {
 	if supplier == nil {
-		return errors.New("no supplier provided")
+		return uuid.Nil, errors.New("no supplier provided")
 	}
 	uid, err := supplier.ID.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
-		stmt, err := r.TX.Prepare("UPDATE suppliers SET name = ?, description = ? WHERE id = ?")
+		stmt, err := r.TX.Prepare("UPDATE suppliers SET name = ?, image = ?, description = ?, open_in = ?, close_in = ?, working_days = ? WHERE id = ?")
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		_, err = stmt.Exec(supplier.Name, supplier.Description, uid)
+		_, err = stmt.Exec(
+			supplier.Name,
+			supplier.Image,
+			supplier.Description,
+			supplier.WorkingTime.OpenIn,
+			supplier.WorkingTime.CloseIn,
+			supplier.WorkingTime.WorkingDays,
+			uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return supplier.ID, nil
 	}
-	stmt, err := r.DB.Prepare("UPDATE suppliers SET name = ?, description = ? WHERE id = ?")
+	stmt, err := r.DB.Prepare("UPDATE suppliers SET name = ?, image = ?, description = ?, open_in = ?, close_in = ?, working_days = ? WHERE id = ?")
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	_, err = stmt.Exec(supplier.Name, supplier.Description, uid)
+	_, err = stmt.Exec(
+		supplier.Name,
+		supplier.Image,
+		supplier.Description,
+		supplier.WorkingTime.OpenIn,
+		supplier.WorkingTime.CloseIn,
+		supplier.WorkingTime.WorkingDays,
+		uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return supplier.ID, nil
 }
 
-func (r *SuppliersRepo) DeleteSupplier(id uuid.UUID) (err error) {
+func (r *SuppliersRepo) DeleteSupplier(id uuid.UUID) (uuid.UUID, error) {
 	uid, err := id.MarshalBinary()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM suppliers WHERE id = ?", uid)
 		if err != nil {
-			return err
+			return uuid.Nil, err
 		}
-		return nil
+		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM suppliers WHERE id = ?", uid)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
-	return nil
+	return id, nil
 }
 
 func (r *SuppliersRepo) BeginTx() error {

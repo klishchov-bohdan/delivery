@@ -155,23 +155,18 @@ func (r *TokensRepo) DeleteTokenByUserID(id uuid.UUID) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
-	var tokenID uuid.UUID
-	err = r.DB.QueryRow("SELECT id FROM tokens WHERE user_id = ?", uid).Scan(&tokenID)
-	if err != nil {
-		return uuid.Nil, err
-	}
 	if r.TX != nil {
 		_, err = r.TX.Exec("DELETE FROM tokens WHERE user_id = ?", uid)
 		if err != nil {
 			return uuid.Nil, err
 		}
-		return tokenID, nil
+		return id, nil
 	}
 	_, err = r.DB.Exec("DELETE FROM tokens WHERE user_id = ?", uid)
 	if err != nil {
 		return uuid.Nil, err
 	}
-	return tokenID, nil
+	return id, nil
 }
 
 func (r *TokensRepo) BeginTx() error {

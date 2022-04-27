@@ -72,7 +72,7 @@ func (service *UsersWebService) CreateUserWithTokens(user *models.User, token *m
 	userID, err = service.store.Users.CreateUser(user)
 	if err != nil {
 		_ = service.store.Users.RollbackTx()
-		return uuid.Nil, err
+		return uuid.Nil, errors.New(fmt.Sprintf("user %s is already exists", user.Email))
 	}
 	_, err = service.store.Tokens.CreateToken(token)
 	if err != nil {

@@ -2,11 +2,10 @@ package middleware
 
 import (
 	"encoding/base64"
-	"github.com/joho/godotenv"
+	"github.com/klishchov-bohdan/delivery/config"
 	"github.com/klishchov-bohdan/delivery/internal/services"
 	"github.com/klishchov-bohdan/delivery/internal/token"
 	"net/http"
-	"os"
 )
 
 type Middleware struct {
@@ -22,24 +21,23 @@ func NewMiddleware(service *services.Manager) *Middleware {
 func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		accessString := token.GetTokenFromBearerString(r.Header.Get("Authorization"))
-		err := godotenv.Load("config/token.env")
-		if err != nil {
-			http.Error(w, "Cant load token.env file", http.StatusInternalServerError)
+		if accessString == "" {
+			http.Error(w, "middleware: invalid bearer string", http.StatusUnauthorized)
 			return
 		}
-		accessSecret := os.Getenv("AccessSecret")
-		isValid, err := token.ValidateToken(accessString, accessSecret)
+		cfg := config.NewConfig()
+		isValid, err := token.ValidateToken(accessString, cfg.AccessSecret)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "middleware: invalid token", http.StatusUnauthorized)
 			return
 		}
 		if !isValid {
 			http.Error(w, "middleware: invalid token", http.StatusUnauthorized)
 			return
 		}
-		claims, err := token.GetClaims(accessString, accessSecret)
+		claims, err := token.GetClaims(accessString, cfg.AccessSecret)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "middleware: can`t cet claims", http.StatusUnauthorized)
 			return
 		}
 		received, err := m.service.Token.GetTokenByUserID(claims.ID)
@@ -51,6 +49,17 @@ func (m *Middleware) AuthCheck(next http.Handler) http.Handler {
 			http.Error(w, "middleware: user has not authorised", http.StatusUnauthorized)
 			return
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (m *Middleware) SetCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cfg := config.NewConfig()
+		w.Header().Set("Access-Control-Allow-Origin", cfg.AccessControlAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Methods", cfg.AccessControlAllowMethods)
+		w.Header().Set("Access-Control-Allow-Headers", cfg.AccessControlAllowHeaders)
+		w.Header().Set("Access-Control-Expose-Headers", cfg.AccessControlExposeHeaders)
 		next.ServeHTTP(w, r)
 	})
 }

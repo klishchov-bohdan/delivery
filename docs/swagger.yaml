@@ -1,0 +1,671 @@
+basePath: /
+definitions:
+  models.MenuItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      type:
+        type: string
+      weight:
+        type: number
+    type: object
+  models.Product:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      supplierID:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+      weight:
+        type: number
+    type: object
+  models.ShippingAddress:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      county:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      updatedAt:
+        type: string
+      zipcode:
+        type: string
+    type: object
+  models.SupplierWeb:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      menu:
+        items:
+          $ref: '#/definitions/models.MenuItem'
+        type: array
+      name:
+        type: string
+      working_time:
+        $ref: '#/definitions/models.WorkingSchedule'
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      passwordHash:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.WorkingSchedule:
+    properties:
+      close_in:
+        type: string
+      open_in:
+        type: string
+      working_days:
+        type: string
+    type: object
+  requests.AddressRequest:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      county:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      zipcode:
+        type: string
+    type: object
+  requests.MenuItemRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      type:
+        type: string
+      weight:
+        type: number
+    type: object
+  requests.OrderProductsRequest:
+    properties:
+      productID:
+        type: string
+      productQuantity:
+        type: integer
+      totalPrice:
+        type: integer
+    type: object
+  requests.OrderRequest:
+    properties:
+      clientPhone:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/requests.OrderProductsRequest'
+        type: array
+      shippingAddress:
+        $ref: '#/definitions/requests.AddressRequest'
+      totalPrice:
+        type: integer
+      userID:
+        type: string
+    type: object
+  requests.SupplierWebRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      menu:
+        items:
+          $ref: '#/definitions/requests.MenuItemRequest'
+        type: array
+      name:
+        type: string
+      working_time:
+        $ref: '#/definitions/models.WorkingSchedule'
+    type: object
+  requests.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  requests.UserLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  requests.UserRegistrationRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  responses.OrderProductsResponse:
+    properties:
+      id:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      productQuantity:
+        type: integer
+      totalPrice:
+        type: integer
+    type: object
+  responses.OrderResponse:
+    properties:
+      clientPhone:
+        type: string
+      id:
+        type: string
+      orderedProducts:
+        items:
+          $ref: '#/definitions/responses.OrderProductsResponse'
+        type: array
+      shippingAddress:
+        $ref: '#/definitions/models.ShippingAddress'
+      totalPrice:
+        type: integer
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  responses.TokensResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: bogdan.bogdan2525@gmail.com
+  description: Simple swagger implementation in Go HTTP
+  title: Go Restful API with Swagger
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      operationId: user-login
+      parameters:
+      - description: Auth Login Input
+        in: body
+        name: authLogin
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.TokensResponse'
+      summary: Login
+      tags:
+      - auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout
+      operationId: user-logout
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - ApiKeyAuth: []
+      summary: Logout
+      tags:
+      - auth
+  /orders:
+    post:
+      consumes:
+      - application/json
+      description: Create Order
+      operationId: create-order
+      parameters:
+      - description: Create Order Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.OrderResponse'
+      summary: Create Order
+      tags:
+      - orders
+  /orders/{orderId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Order
+      operationId: get-order
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.OrderResponse'
+      summary: Get Order
+      tags:
+      - orders
+  /orders/byUser/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Orders By User ID
+      operationId: get-orders-by-user-id
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.OrderResponse'
+            type: array
+      summary: Get Orders By User ID
+      tags:
+      - orders
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Profile
+      operationId: user-profile
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Profile
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update Profile
+      operationId: user-update-profile
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Update Profile Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Profile
+      tags:
+      - users
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh
+      operationId: user-refresh
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.TokensResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Refresh
+      tags:
+      - auth
+  /registration:
+    post:
+      consumes:
+      - application/json
+      description: Registration
+      operationId: user-registration
+      parameters:
+      - description: Auth Registration Input
+        in: body
+        name: authRegistration
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UserRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.TokensResponse'
+      summary: Registration
+      tags:
+      - auth
+  /suppliers:
+    get:
+      consumes:
+      - application/json
+      description: Get Suppliers
+      operationId: get-suppliers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SupplierWeb'
+            type: array
+      summary: Get Suppliers
+      tags:
+      - suppliers
+    post:
+      consumes:
+      - application/json
+      description: Create Supplier
+      operationId: create-supplier
+      parameters:
+      - description: Create Supplier Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.SupplierWebRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SupplierWeb'
+      summary: Create Supplier
+      tags:
+      - suppliers
+  /suppliers/{supplierId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Supplier
+      operationId: get-supplier
+      parameters:
+      - description: Supplier ID
+        in: path
+        name: supplierId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SupplierWeb'
+      summary: Get Supplier
+      tags:
+      - suppliers
+  /suppliers/{supplierId}/menu:
+    get:
+      consumes:
+      - application/json
+      description: Get Supplier Menu
+      operationId: get-supplier-menu
+      parameters:
+      - description: Supplier ID
+        in: path
+        name: supplierId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MenuItem'
+            type: array
+      summary: Get Supplier Menu
+      tags:
+      - suppliers
+  /suppliers/menu/{productId}:
+    get:
+      consumes:
+      - application/json
+      description: Get Supplier Menu Item
+      operationId: get-supplier-menu-item
+      parameters:
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MenuItem'
+      summary: Get Supplier Menu Item
+      tags:
+      - suppliers
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get Users
+      operationId: get-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Get Users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create User
+      operationId: create-user
+      parameters:
+      - description: Create User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Create User
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update User
+      operationId: update-user
+      parameters:
+      - description: Update User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Update User
+      tags:
+      - users
+  /users/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete User
+      operationId: delete-user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Delete User
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get User
+      operationId: get-user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Get User
+      tags:
+      - users
+swagger: "2.0"
